@@ -255,7 +255,7 @@ export default function Navbar({
                 className="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-text-light hover:bg-gray-50 dark:hover:bg-neutral-800 hover:text-primary-600 dark:hover:text-primary-400"
                 onClick={closeMenu}
               >
-                Projects
+                HOME
               </Link>
             </div>
           </div>
