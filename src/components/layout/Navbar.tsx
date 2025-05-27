@@ -114,6 +114,7 @@ export default function Navbar({
                   value={searchQuery}
                   onChange={handleSearchChange}
                   onFocus={() => setIsCategoryDropdownOpen(true)}
+                  name="desktop_search_query" // <--- TAMBAHKAN INI
                 />
                 <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-500 dark:text-gray-400" />
               </form>
@@ -213,6 +214,7 @@ export default function Navbar({
                       className="w-full rounded-full pl-10 pr-4 py-2 border border-gray-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-text-dark dark:text-text-light placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-500 dark:focus:border-primary-500"
                       value={searchQuery}
                       onChange={handleSearchChange}
+                      name="mobile_search_query" // <--- TAMBAHKAN INI
                     />
                     <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-500 dark:text-gray-400" />
                   </form>

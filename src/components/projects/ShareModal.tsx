@@ -74,6 +74,7 @@ export default function ShareModal({ isOpen, onClose, project }: ShareModalProps
               readOnly
               value={projectUrl}
               className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-gray-600 dark:text-gray-300"
+              id="project-share-url" // Baris ini ditambahkan untuk mengatasi peringatan
             />
             <Button 
               onClick={copyToClipboard} 
