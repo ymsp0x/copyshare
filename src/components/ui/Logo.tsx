@@ -1,11 +1,14 @@
-// copyshare/project-bolt-sb1-u6g5e6ai.zip/project/src/components/ui/Logo.tsx
+// project/src/components/ui/Logo.tsx
 // Hapus import { Copy } dari 'lucide-react' jika tidak lagi digunakan.
 // Hapus juga import path lokal seperti import myLogoImage from '/mylogo.png';
+
+// Import logo lokal dari path yang benar
+import localLogoImage from '/logo.png'; // <--- BARIS INI DITAMBAHKAN/DIMODIFIKASI
 
 export function GradientLogo({ className = 'h-10 w-10' }) {
   // GANTI DENGAN URL LANGSUNG GAMBAR LOGO ANDA DARI IMGUR atau CDN lainnya
   // Pastikan ini adalah URL gambar langsung (berakhir dengan .png, .jpg, .svg, dll.), bukan halaman Imgur.
-  const imageUrl = "https://i.ibb.co/JR8qXYXH/logo.png"; // Asumsi ini adalah URL gambar langsung Anda
+  const imageUrl = localLogoImage; // <--- BARIS INI DIMODIFIKASI untuk menggunakan import lokal
 
   return (
     <div className={`relative ${className}`}>
