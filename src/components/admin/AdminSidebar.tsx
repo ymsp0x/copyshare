@@ -12,15 +12,15 @@ function AdminSidebar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { 
-      path: '/admin', 
-      label: 'Dashboard', 
-      icon: <LayoutDashboard className="mr-3 h-5 w-5" /> 
+    {
+      path: '/admin',
+      label: 'Dashboard',
+      icon: <LayoutDashboard className="mr-3 h-5 w-5" />
     },
-    { 
-      path: '/admin/new', 
-      label: 'Add Project', 
-      icon: <PlusCircle className="mr-3 h-5 w-5" /> 
+    {
+      path: '/admin/new',
+      label: 'Add Project',
+      icon: <PlusCircle className="mr-3 h-5 w-5" />
     },
   ];
 
@@ -39,10 +39,11 @@ function AdminSidebar() {
   return (
     <>
       {/* Mobile Toggle Button */}
+      {/* This button is fixed and will sit above the main content on mobile */}
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <button
           onClick={toggleMobileMenu}
-          className="p-2 rounded-md bg-white dark:bg-neutral-800 shadow-md text-text-dark dark:text-text-light focus:outline-none" // MODIFIED
+          className="p-2 rounded-md bg-white dark:bg-neutral-800 shadow-md text-neutral-900 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -51,13 +52,13 @@ function AdminSidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "bg-white dark:bg-neutral-900 shadow-md z-40", // MODIFIED
+          "bg-white dark:bg-neutral-900 shadow-md z-40",
           "fixed inset-y-0 left-0 w-64 transition-transform duration-300 ease-in-out transform lg:translate-x-0",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="h-full flex flex-col">
-          <div className="p-5 border-b border-gray-200 dark:border-neutral-700">
+          <div className="p-5 border-b border-neutral-200 dark:border-neutral-700">
             <TextLogo />
           </div>
 
@@ -69,8 +70,8 @@ function AdminSidebar() {
                 className={cn(
                   "flex items-center px-3 py-3 text-sm font-medium rounded-md transition-colors",
                   location.pathname === item.path
-                    ? "bg-primary-50 text-primary-700 dark:bg-primary-900 dark:text-primary-200" // MODIFIED
-                    : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-neutral-800 hover:text-primary-600 dark:hover:text-primary-400" // MODIFIED
+                    ? "bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200" // Updated active state colors for consistency
+                    : "text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-blue-600 dark:hover:text-blue-400" // Updated hover state colors
                 )}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -80,7 +81,7 @@ function AdminSidebar() {
             ))}
           </nav>
 
-          <div className="px-3 py-4 border-t border-gray-200 dark:border-neutral-700">
+          <div className="px-3 py-4 border-t border-neutral-200 dark:border-neutral-700">
             <button
               onClick={handleSignOut}
               className="flex items-center w-full px-3 py-3 text-sm font-medium text-red-600 dark:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900"
@@ -92,7 +93,7 @@ function AdminSidebar() {
         </div>
       </aside>
 
-      {/* Overlay for mobile */}
+      {/* Overlay for mobile - covers content when sidebar is open */}
       {isMobileMenuOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"

@@ -3,15 +3,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base HTML and Body Styles */
 html {
   transition: background-color 0.3s ease;
 }
 
 body {
-  font-family: 'Inter', sans-serif; /* Pastikan body tidak memiliki background-color tetap yang menimpa dark mode */
+  font-family: 'Inter', sans-serif;
+  /* Tailwind's dark mode class on html/body handles the background color */
 }
 
-/* Keyframes untuk animasi fade-in-up */
+/* Keyframes for animations */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -23,7 +25,6 @@ body {
   }
 }
 
-/* Keyframes untuk animasi fade-in */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -31,4 +32,123 @@ body {
   to {
     opacity: 1;
   }
+}
+
+---
+
+/* React-Quill Specific Styles and Dark Mode Overrides */
+
+/* General editor content color (default for light mode) */
+.ql-editor {
+  color: #1A202C; /* text-dark from config */
+  min-height: 180px; /* Ensure a consistent height for the editor */
+}
+
+/* Default Quill toolbar and container borders/backgrounds (light mode) */
+.ql-toolbar.ql-snow,
+.ql-container.ql-snow {
+  background-color: #FFFFFF; /* White */
+  border-color: #E5E7EB; /* neutral-200 */
+}
+
+/* Placeholder text color */
+.ql-editor.ql-blank::before {
+  color: #9CA3AF; /* neutral-400 */
+}
+
+/* Toolbar buttons (icons) and dropdown arrows in light mode */
+.ql-snow .ql-stroke {
+  stroke: #4B5563; /* neutral-600 */
+}
+.ql-snow .ql-fill {
+  fill: #4B5563; /* neutral-600 */
+}
+
+/* Active/selected toolbar buttons in light mode */
+.ql-snow .ql-active .ql-stroke,
+.ql-snow .ql-active .ql-fill {
+  stroke: #4A90E2; /* primary-DEFAULT */
+  fill: #4A90E2; /* primary-DEFAULT */
+}
+
+/* Hover state for toolbar buttons in light mode */
+.ql-snow .ql-toolbar button:hover .ql-stroke,
+.ql-snow .ql-toolbar button:hover .ql-fill,
+.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke,
+.ql-snow .ql-toolbar .ql-picker-label:hover .ql-fill,
+.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke,
+.ql-snow .ql-toolbar .ql-picker-item:hover .ql-fill {
+  stroke: #4A90E2; /* primary-DEFAULT on hover */
+  fill: #4A90E2; /* primary-DEFAULT on hover */
+}
+
+/* Dropdown backgrounds for font, size, etc. in light mode */
+.ql-snow .ql-picker.ql-expanded .ql-picker-options {
+  background-color: #FFFFFF; /* White */
+  border-color: #E5E7EB; /* neutral-200 */
+}
+
+/* Dropdown item hover in light mode */
+.ql-snow .ql-picker-item:hover,
+.ql-snow .ql-picker-label:hover {
+  background-color: #F3F4F6; /* neutral-100 */
+  color: #1A202C; /* text-dark */
+}
+
+
+/* --- Dark Mode Overrides for Quill --- */
+/* These styles apply when the 'dark' class is present on a parent element (e.g., html or body) */
+
+.dark .ql-editor {
+  color: #F8FAFC; /* text-light from config */
+}
+
+.dark .ql-toolbar.ql-snow,
+.dark .ql-container.ql-snow {
+  background-color: #111621; /* neutral-900 from config */
+  border-color: #374151; /* neutral-700 from config */
+}
+
+.dark .ql-editor.ql-blank::before {
+  color: #6B7280; /* neutral-500 from config */
+}
+
+/* Dark mode toolbar buttons (icons) and dropdown arrows */
+.dark .ql-snow .ql-stroke {
+  stroke: #D1D5DB; /* neutral-300 from config */
+}
+
+.dark .ql-snow .ql-fill {
+  fill: #D1D5DB; /* neutral-300 from config */
+}
+
+/* Dark mode active/selected toolbar buttons */
+.dark .ql-snow .ql-active .ql-stroke,
+.dark .ql-snow .ql-active .ql-fill {
+  stroke: #4A90E2; /* primary-DEFAULT for active */
+  fill: #4A90E2; /* primary-DEFAULT for active */
+}
+
+/* Dark mode hover state for toolbar buttons */
+.dark .ql-snow .ql-toolbar button:hover .ql-stroke,
+.dark .ql-snow .ql-toolbar button:hover .ql-fill,
+.dark .ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke,
+.dark .ql-snow .ql-toolbar .ql-picker-label:hover .ql-fill,
+.dark .ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke,
+.dark .ql-snow .ql-toolbar .ql-picker-item:hover .ql-fill {
+  stroke: #4A90E2; /* primary-DEFAULT on hover */
+  fill: #4A90E2; /* primary-DEFAULT on hover */
+}
+
+/* Dark mode dropdown backgrounds for font, size, etc. */
+.dark .ql-snow .ql-picker.ql-expanded .ql-picker-options {
+  background-color: #111621; /* neutral-900 from config */
+  border-color: #374151; /* neutral-700 from config */
+}
+
+/* Dark mode dropdown item hover */
+.dark .ql-snow .ql-picker-item:hover,
+.dark .ql-snow .ql-picker-label:hover {
+  background-color: #181E2E; /* neutral-800 from config */
+  color: #F8FAFC; /* text-light from config */
 }

@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": ["ES2023"],
-    "module": "ESNext",
+    "target": "ES2022", // Good, targets a slightly newer JS version for Node.js
+    "lib": ["ES2023"], // Good, uses latest library definitions for Node.js
+    "module": "ESNext", // Consistent module system
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -18,5 +18,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts"] // Correctly includes Vite config
 }

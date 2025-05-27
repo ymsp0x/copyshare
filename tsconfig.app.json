@@ -1,24 +1,24 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
+    "target": "ES2020", // Good for modern browsers
+    "useDefineForClassFields": true, // Standard for modern JS/TS
+    "lib": ["ES2020", "DOM", "DOM.Iterable"], // Good set of libraries
+    "module": "ESNext", // Modern module system
+    "skipLibCheck": true, // Speeds up compilation, generally safe
 
     /* Bundler mode */
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
+    "moduleResolution": "bundler", // Correct for Vite
+    "allowImportingTsExtensions": true, // Allows .ts/.tsx imports
+    "isolatedModules": true, // Ensures modules can be compiled independently (good for Vite/Babel)
+    "moduleDetection": "force", // Helps bundlers detect modules correctly
+    "noEmit": true, // Vite handles emission, so TypeScript doesn't need to
+    "jsx": "react-jsx", // Correct for React 17+ JSX transform
 
     /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "strict": true, // Highly recommended for type safety
+    "noUnusedLocals": true, // Helps keep code clean
+    "noUnusedParameters": true, // Helps keep code clean
+    "noFallthroughCasesInSwitch": true // Prevents common bugs
   },
-  "include": ["src"]
+  "include": ["src"] // Correctly includes your source files
 }

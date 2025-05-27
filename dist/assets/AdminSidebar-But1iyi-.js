@@ -1,0 +1,16 @@
+import{b as u,d as x,r as h,j as e,L as m}from"./index-WASHv_N7.js";import{c as n,T as b}from"./Button-Dnv-DVnN.js";import{c as s,X as g,M as p}from"./x-C5g2DXhF.js";/**
+ * @license lucide-react v0.395.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const y=s("CirclePlus",[["circle",{cx:"12",cy:"12",r:"10",key:"1mglay"}],["path",{d:"M8 12h8",key:"1wcyev"}],["path",{d:"M12 8v8",key:"napkw2"}]]);/**
+ * @license lucide-react v0.395.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const k=s("LayoutDashboard",[["rect",{width:"7",height:"9",x:"3",y:"3",rx:"1",key:"10lvy0"}],["rect",{width:"7",height:"5",x:"14",y:"3",rx:"1",key:"16une8"}],["rect",{width:"7",height:"9",x:"14",y:"12",rx:"1",key:"1hutg5"}],["rect",{width:"7",height:"5",x:"3",y:"16",rx:"1",key:"ldoo1y"}]]);/**
+ * @license lucide-react v0.395.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */const f=s("LogOut",[["path",{d:"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4",key:"1uf3rs"}],["polyline",{points:"16 17 21 12 16 7",key:"1gabdz"}],["line",{x1:"21",x2:"9",y1:"12",y2:"12",key:"1uyos4"}]]);function N(){const l=u(),{signOut:o}=x(),[a,r]=h.useState(!1),d=[{path:"/admin",label:"Dashboard",icon:e.jsx(k,{className:"mr-3 h-5 w-5"})},{path:"/admin/new",label:"Add Project",icon:e.jsx(y,{className:"mr-3 h-5 w-5"})}],i=async()=>{try{await o()}catch(t){console.error("Error signing out:",t)}},c=()=>{r(!a)};return e.jsxs(e.Fragment,{children:[e.jsx("div",{className:"lg:hidden fixed top-4 left-4 z-50",children:e.jsx("button",{onClick:c,className:"p-2 rounded-md bg-white dark:bg-neutral-800 shadow-md text-neutral-900 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-blue-500",children:a?e.jsx(g,{size:24}):e.jsx(p,{size:24})})}),e.jsx("aside",{className:n("bg-white dark:bg-neutral-900 shadow-md z-40","fixed inset-y-0 left-0 w-64 transition-transform duration-300 ease-in-out transform lg:translate-x-0",a?"translate-x-0":"-translate-x-full"),children:e.jsxs("div",{className:"h-full flex flex-col",children:[e.jsx("div",{className:"p-5 border-b border-neutral-200 dark:border-neutral-700",children:e.jsx(b,{})}),e.jsx("nav",{className:"flex-1 px-3 py-4 space-y-1",children:d.map(t=>e.jsxs(m,{to:t.path,className:n("flex items-center px-3 py-3 text-sm font-medium rounded-md transition-colors",l.pathname===t.path?"bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200":"text-neutral-700 dark:text-neutral-200 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-blue-600 dark:hover:text-blue-400"),onClick:()=>r(!1),children:[t.icon,t.label]},t.path))}),e.jsx("div",{className:"px-3 py-4 border-t border-neutral-200 dark:border-neutral-700",children:e.jsxs("button",{onClick:i,className:"flex items-center w-full px-3 py-3 text-sm font-medium text-red-600 dark:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900",children:[e.jsx(f,{className:"mr-3 h-5 w-5"}),"Logout"]})})]})}),a&&e.jsx("div",{className:"fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden",onClick:()=>r(!1)})]})}export{N as A,y as C};
