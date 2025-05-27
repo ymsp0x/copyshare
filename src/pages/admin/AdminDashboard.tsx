@@ -136,7 +136,7 @@ function AdminDashboard() {
     <div className="flex h-screen bg-background-light dark:bg-background-dark"> {/* MODIFIED */}
       <AdminSidebar />
       
-      <div className="flex-1 lg:ml-64 overflow-auto">
+      <div className="flex-1 overflow-auto">
         <main className="p-6">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold text-text-dark dark:text-text-light">Dashboard</h1> {/* MODIFIED */}
