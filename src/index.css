@@ -1,7 +1,100 @@
+/* project/src/index.css */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom CSS Variables */
+:root {
+  --color-primary-50: #EBF8FF;
+  --color-primary-100: #DBEEFF;
+  --color-primary-500: #4A90E2;
+  --color-primary-600: #3B72C7;
+  --color-primary-700: #2C5696;
+  --color-primary-800: #1D3A65;
+
+  --color-red-400: #F87171;
+  --color-red-500: #EF4444;
+  --color-red-600: #DC2626;
+
+  --color-neutral-50: #F9FAFB;
+  --color-neutral-100: #F3F4F6;
+  --color-neutral-200: #E5E7EB;
+  --color-neutral-300: #D1D5DB;
+  --color-neutral-400: #9CA3AF;
+  --color-neutral-500: #6B7280;
+  --color-neutral-600: #4B5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1F2937;
+  --color-neutral-900: #111827;
+
+  --text-primary-700: var(--color-primary-700);
+  --text-primary-800: var(--color-primary-800);
+  --text-neutral-900: var(--color-neutral-900);
+  --text-neutral-400: var(--color-neutral-400);
+  --text-neutral-500: var(--color-neutral-500);
+  --text-neutral-800: var(--color-neutral-800);
+  --text-neutral-100: var(--color-neutral-100);
+  --text-red-600: var(--color-red-600);
+
+  --bg-white: #FFFFFF;
+  --bg-neutral-50: var(--color-neutral-50);
+  --bg-neutral-100: var(--color-neutral-100);
+  --bg-primary-50: var(--color-primary-50);
+
+  --border-neutral-300: var(--color-neutral-300);
+  --border-neutral-200: var(--color-neutral-200);
+  --border-neutral-600: var(--color-neutral-600);
+  --border-blue-500: var(--color-primary-500);
+  --border-red-500: var(--color-red-500);
+
+  --ring-blue-500: var(--color-primary-500);
+}
+
+/* Dark Mode Overrides */
+html.dark {
+  --color-primary-50: #1D3A65;
+  --color-primary-100: #2C5696;
+  --color-primary-500: #4A90E2;
+  --color-primary-600: #5C9FEF;
+  --color-primary-700: #6AAFFF;
+  --color-primary-800: #7BBFFF;
+
+  --color-red-400: #DC2626;
+  --color-red-500: #F87171;
+
+  --color-neutral-50: #111827;
+  --color-neutral-100: #1F2937;
+  --color-neutral-200: #374151;
+  --color-neutral-300: #4B5563;
+  --color-neutral-400: #6B7280;
+  --color-neutral-500: #9CA3AF;
+  --color-neutral-600: #CBD5E0;
+  --color-neutral-700: #E2E8F0;
+  --color-neutral-800: #EDF2F7;
+  --color-neutral-900: #F7FAFC;
+
+  --text-primary-700: var(--color-primary-600);
+  --text-primary-800: var(--color-primary-700);
+  --text-neutral-900: var(--color-neutral-900);
+  --text-neutral-400: var(--color-neutral-500);
+  --text-neutral-500: var(--color-neutral-400);
+  --text-neutral-800: var(--color-neutral-100);
+  --text-neutral-100: var(--color-neutral-800);
+  --text-red-600: var(--color-red-400);
+
+  --bg-white: var(--color-neutral-50);
+  --bg-neutral-50: var(--color-neutral-50);
+  --bg-neutral-100: var(--color-neutral-100);
+  --bg-primary-50: var(--color-primary-700);
+
+  --border-neutral-300: var(--color-neutral-700);
+  --border-neutral-200: var(--color-neutral-700);
+  --border-neutral-600: var(--color-neutral-300);
+  --border-blue-500: var(--color-primary-500);
+  --border-red-500: var(--color-red-400);
+}
 
 /* Base HTML and Body Styles */
 html {
@@ -10,7 +103,7 @@ html {
 
 body {
   font-family: 'Inter', sans-serif;
-  /* Tailwind's dark mode class on html/body handles the background color */
+  color: var(--text-neutral-900); /* Default text color for light mode */
 }
 
 /* Keyframes for animations */
@@ -34,121 +127,252 @@ body {
   }
 }
 
----
-
-/* React-Quill Specific Styles and Dark Mode Overrides */
-
-/* General editor content color (default for light mode) */
+/* React-Quill Specific Styles */
 .ql-editor {
-  color: #1A202C; /* text-dark from config */
-  min-height: 180px; /* Ensure a consistent height for the editor */
+  color: var(--text-neutral-900); /* Default text color for editor content */
+  min-height: 180px;
+  box-sizing: border-box;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  overflow: visible !important;
 }
 
-/* Default Quill toolbar and container borders/backgrounds (light mode) */
 .ql-toolbar.ql-snow,
 .ql-container.ql-snow {
-  background-color: #FFFFFF; /* White */
-  border-color: #E5E7EB; /* neutral-200 */
+  background-color: var(--bg-white);
+  border-color: var(--border-neutral-300);
 }
 
-/* Placeholder text color */
 .ql-editor.ql-blank::before {
-  color: #9CA3AF; /* neutral-400 */
+  color: var(--text-neutral-400);
+  font-style: normal;
 }
 
-/* Toolbar buttons (icons) and dropdown arrows in light mode */
 .ql-snow .ql-stroke {
-  stroke: #4B5563; /* neutral-600 */
+  stroke: var(--color-neutral-600);
+  stroke-width: 1.5px;
 }
-.ql-snow .ql-fill {
-  fill: #4B5563; /* neutral-600 */
-}
-
-/* Active/selected toolbar buttons in light mode */
-.ql-snow .ql-active .ql-stroke,
-.ql-snow .ql-active .ql-fill {
-  stroke: #4A90E2; /* primary-DEFAULT */
-  fill: #4A90E2; /* primary-DEFAULT */
+.ql.snow .ql.fill {
+  fill: var(--color-neutral-600);
 }
 
-/* Hover state for toolbar buttons in light mode */
-.ql-snow .ql-toolbar button:hover .ql-stroke,
-.ql-snow .ql-toolbar button:hover .ql-fill,
-.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke,
-.ql-snow .ql-toolbar .ql-picker-label:hover .ql-fill,
-.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke,
-.ql-snow .ql-toolbar .ql-picker-item:hover .ql-fill {
-  stroke: #4A90E2; /* primary-DEFAULT on hover */
-  fill: #4A90E2; /* primary-DEFAULT on hover */
+.ql-toolbar.ql.snow button svg {
+  width: 18px;
+  height: 18px;
 }
 
-/* Dropdown backgrounds for font, size, etc. in light mode */
-.ql-snow .ql-picker.ql-expanded .ql-picker-options {
-  background-color: #FFFFFF; /* White */
-  border-color: #E5E7EB; /* neutral-200 */
+@media (max-width: 767px) {
+  .ql-toolbar.ql.snow button svg {
+    width: 16px;
+    height: 16px;
+  }
+  .ql.toolbar.ql.snow button {
+    padding: 4px !important;
+    min-width: 32px;
+    min-height: 32px;
+  }
 }
 
-/* Dropdown item hover in light mode */
-.ql-snow .ql-picker-item:hover,
-.ql-snow .ql-picker-label:hover {
-  background-color: #F3F4F6; /* neutral-100 */
-  color: #1A202C; /* text-dark */
+.ql.snow .ql.active .ql.stroke,
+.ql.snow .ql.active .ql.fill {
+  stroke: var(--color-primary-500);
+  fill: var(--color-primary-500);
 }
 
-
-/* --- Dark Mode Overrides for Quill --- */
-/* These styles apply when the 'dark' class is present on a parent element (e.g., html or body) */
-
-.dark .ql-editor {
-  color: #F8FAFC; /* text-light from config */
+.ql.snow .ql.toolbar button:hover .ql.stroke,
+.ql.snow .ql.toolbar button:hover .ql.fill,
+.ql.snow .ql.toolbar .ql.picker-label:hover .ql.stroke,
+.ql.snow .ql.toolbar .ql.picker-label:hover .ql.fill,
+.ql.snow .ql.toolbar .ql.picker-item:hover .ql.stroke,
+.ql.snow .ql.toolbar .ql.picker-item:hover .ql.fill {
+  stroke: var(--color-primary-500);
+  fill: var(--color-primary-500);
 }
 
-.dark .ql-toolbar.ql-snow,
-.dark .ql-container.ql-snow {
-  background-color: #111621; /* neutral-900 from config */
-  border-color: #374151; /* neutral-700 from config */
+.ql.snow .ql.picker.ql.expanded .ql.picker-options {
+  background-color: var(--bg-white);
+  border-color: var(--border-neutral-300);
 }
 
-.dark .ql-editor.ql-blank::before {
-  color: #6B7280; /* neutral-500 from config */
+.ql.snow .ql.picker-item:hover,
+.ql.snow .ql.picker-label:hover {
+  background-color: var(--bg-neutral-100);
+  color: var(--text-neutral-900);
 }
 
-/* Dark mode toolbar buttons (icons) and dropdown arrows */
-.dark .ql-snow .ql-stroke {
-  stroke: #D1D5DB; /* neutral-300 from config */
+/* Quill Toolbar Responsiveness (Full Feature & Wrapping) */
+.ql-toolbar.ql.snow {
+  width: 100%;
+  padding: 8px 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  overflow: visible;
 }
 
-.dark .ql-snow .ql-fill {
-  fill: #D1D5DB; /* neutral-300 from config */
+.ql.toolbar.ql.snow .ql.formats {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 4px;
+  margin-right: 8px;
+  margin-bottom: 8px;
 }
 
-/* Dark mode active/selected toolbar buttons */
-.dark .ql-snow .ql-active .ql-stroke,
-.dark .ql-snow .ql-active .ql-fill {
-  stroke: #4A90E2; /* primary-DEFAULT for active */
-  fill: #4A90E2; /* primary-DEFAULT for active */
+.ql.toolbar.ql.snow .ql.picker-label {
+  padding: 6px 8px !important;
+  width: auto !important;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Dark mode hover state for toolbar buttons */
-.dark .ql-snow .ql-toolbar button:hover .ql-stroke,
-.dark .ql-snow .ql-toolbar button:hover .ql-fill,
-.dark .ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke,
-.dark .ql-snow .ql-toolbar .ql-picker-label:hover .ql-fill,
-.dark .ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke,
-.dark .ql-snow .ql-toolbar .ql-picker-item:hover .ql-fill {
-  stroke: #4A90E2; /* primary-DEFAULT on hover */
-  fill: #4A90E2; /* primary-DEFAULT on hover */
+.ql.snow .ql.picker.ql.expanded .ql.picker-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-width: 250px;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1000;
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-neutral-300);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 0.25rem;
 }
 
-/* Dark mode dropdown backgrounds for font, size, etc. */
-.dark .ql-snow .ql-picker.ql-expanded .ql-picker-options {
-  background-color: #111621; /* neutral-900 from config */
-  border-color: #374151; /* neutral-700 from config */
+/* Dark Mode Overrides for Quill Content (Adjusted for `body` handling color) */
+html.dark {
+  /* This ensures the root body text is light in dark mode */
+  body {
+    color: var(--text-neutral-900) !important;
+  }
+
+  /* Force light color for ql-editor content and its elements */
+  /* This is crucial for overcoming inline styles and default Quill dark colors */
+  .ql-editor,
+  .ql-editor *,
+  .ql-editor p,
+  .ql-editor h1, .ql-editor h2, .ql-editor h3, .ql-editor h4, .ql-editor h5, .ql-editor h6,
+  .ql-editor strong, .ql-editor em, .ql-editor li,
+  .ql-editor span[style], /* Targets spans with inline styles */
+  .ql-editor code[style], /* Targets code with inline styles */
+  .ql-editor a[style], /* Targets links with inline styles */
+  .ql-editor pre.ql-syntax,
+  .ql-editor pre.ql-syntax * /* Targets children within ql-syntax pre */
+  {
+      color: var(--text-neutral-50) !important; /* Force light text color */
+      background-color: transparent !important; /* Ensure background is transparent */
+      opacity: 1 !important; /* Ensure full opacity */
+      -webkit-text-fill-color: var(--text-neutral-50) !important; /* For specific WebKit cases */
+  }
+
+  /* Default ql-editor container colors in dark mode */
+  .ql-toolbar.ql-snow,
+  .ql-container.ql.snow {
+    background-color: var(--bg-neutral-50);
+    border-color: var(--border-neutral-700);
+  }
+
+  .ql-editor.ql-blank::before {
+    color: var(--text-neutral-500);
+  }
+
+  .ql.snow .ql-stroke {
+    stroke: var(--color-neutral-400);
+  }
+  .ql.snow .ql.fill {
+    fill: var(--color-neutral-400);
+  }
+
+  .ql.snow .ql.active .ql.stroke,
+  .ql.snow .ql.active .ql.fill {
+    stroke: var(--color-primary-500);
+    fill: var(--color-primary-500);
+  }
+
+  .ql.snow .ql.toolbar button:hover .ql.stroke,
+  .ql.snow .ql.toolbar button:hover .ql.fill,
+  .ql.snow .ql.toolbar .ql.picker-label:hover .ql.stroke,
+  .ql.snow .ql.toolbar .ql.picker-label:hover .ql.fill,
+  .ql.snow .ql.toolbar .ql.picker-item:hover .ql.stroke,
+  .ql.snow .ql.toolbar .ql.picker-item:hover .ql.fill {
+    stroke: var(--color-primary-600);
+    fill: var(--color-primary-600);
+  }
+
+  .ql.snow .ql.picker.ql.expanded .ql.picker-options {
+    background-color: var(--bg-neutral-100);
+    border-color: var(--border-neutral-700);
+  }
+
+  .ql.snow .ql.picker-item:hover,
+  .ql.snow .ql.picker-label:hover {
+    background-color: var(--bg-neutral-200);
+    color: var(--text-neutral-900);
+  }
+
+  /* Ensure links in dark mode are also readable */
+  .ql-editor a {
+      color: var(--color-primary-400) !important;
+  }
+
+  /* Ensure blockquote in dark mode also has correct text color */
+  .ql-editor blockquote {
+      color: var(--text-neutral-300) !important;
+      border-color: var(--border-neutral-500) !important;
+  }
+
+  /* Ensure pre (code block) in dark mode has correct background and light text */
+  .ql-editor pre {
+      background-color: var(--bg-neutral-800) !important;
+      color: var(--text-neutral-200) !important;
+  }
 }
 
-/* Dark mode dropdown item hover */
-.dark .ql-snow .ql-picker-item:hover,
-.dark .ql-snow .ql-picker-label:hover {
-  background-color: #181E2E; /* neutral-800 from config */
-  color: #F8FAFC; /* text-light from config */
+/* Specific block elements within ql-editor (wrapping) */
+.ql-editor p,
+.ql.editor h1, .ql.editor h2, .ql.editor h3, .ql.editor h4, .ql.editor h5, .ql.editor h6,
+.ql.editor ul, .ql.editor ol, .ql.editor li,
+.ql.editor blockquote, .ql.editor pre
+{
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Specific styles for Blockquote */
+.ql-editor blockquote {
+  border-left: 4px solid var(--border-neutral-400);
+  margin-left: 1.5em;
+  padding-left: 1em;
+  color: var(--text-neutral-700);
+  font-style: italic;
+  margin-bottom: 1em;
+}
+
+/* Specific styles for Code Block (pre tag) */
+.ql-editor pre {
+  background-color: var(--bg-neutral-800);
+  color: var(--text-neutral-700); /* Dark grey for light mode contrast */
+  padding: 1em;
+  border-radius: 0.5rem;
+  font-family: 'Space Mono', monospace;
+  margin-bottom: 1em;
+  word-break: break-all !important;
+  overflow-x: auto !important;
+  max-width: 100% !important;
+}
+
+/* Spacing for Lists */
+.ql-editor ul,
+.ql.editor ol {
+    margin-bottom: 1em;
+    padding-left: 1.5em;
+}
+.ql.editor li {
+    margin-bottom: 0.5em;
 }

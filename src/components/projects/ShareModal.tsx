@@ -1,4 +1,4 @@
-import { Facebook, X, Share2 } from 'lucide-react';
+import { Facebook, X, Share2 } from 'lucide-react'; // Pastikan X diimpor dari lucide-react
 import { Project } from '../../types/database.types';
 import Button from '../ui/Button';
 import { toast } from 'react-hot-toast';
@@ -33,6 +33,12 @@ export default function ShareModal({ isOpen, onClose, project }: ShareModalProps
       url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(projectUrl)}`,
       color: 'bg-[#1877F2] hover:bg-[#0e67da]'
     },
+    { // --- OPSI X/TWITTER BARU ---
+      name: 'X (Twitter)',
+      icon: <X className="h-5 w-5" />, // Menggunakan ikon X dari lucide-react
+      url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out this project: ${project.title}`)}&url=${encodeURIComponent(projectUrl)}`,
+      color: 'bg-black hover:bg-neutral-800' // Warna brand X/Twitter
+    },
   ];
 
   const copyToClipboard = () => {
@@ -51,7 +57,7 @@ export default function ShareModal({ isOpen, onClose, project }: ShareModalProps
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"> {/* MODIFIED: Tambahkan z-50 pada div utama modal */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
       
       <div className="bg-white/10 dark:bg-neutral-800/20 rounded-lg shadow-xl w-full max-w-md relative z-10 overflow-hidden backdrop-blur-md border border-white/20 dark:border-neutral-700/50">
@@ -74,7 +80,7 @@ export default function ShareModal({ isOpen, onClose, project }: ShareModalProps
               readOnly
               value={projectUrl}
               className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-gray-600 dark:text-gray-300"
-              id="project-share-url" // Baris ini ditambahkan untuk mengatasi peringatan
+              id="project-share-url"
             />
             <Button 
               onClick={copyToClipboard} 

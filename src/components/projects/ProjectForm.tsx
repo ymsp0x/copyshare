@@ -8,8 +8,8 @@ import { supabase } from '../../lib/supabase';
 import { slugify, CATEGORIES } from '../../lib/utils';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css'; // Keep Quill's default theme CSS for base styling
+import Select from 'react-select';
+import RichTextEditor from '../ui/RichTextEditor';
 
 interface ProjectFormProps {
   project?: Project;
@@ -18,17 +18,33 @@ interface ProjectFormProps {
 
 type FormValues = {
   title: string;
-  description: string; // Quill outputs HTML string
+  description: string;
   status: 'Aktif' | 'Segera' | 'Selesai';
   slug: string;
   project_url: string;
   categories: string[];
 };
 
+const categoryOptions = CATEGORIES.map(category => ({
+  value: category,
+  label: category,
+}));
+
+function getFileNameFromUrl(url: string): string {
+  try {
+    const urlObj = new URL(url);
+    const parts = urlObj.pathname.split('/');
+    return parts.filter(Boolean).pop() || url;
+  } catch (error) {
+    return url;
+  }
+}
+
 export default function ProjectForm({ project, isEditMode = false }: ProjectFormProps) {
   const navigate = useNavigate();
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageFileName, setImageFileName] = useState<string | null>(project?.image_url ? getFileNameFromUrl(project.image_url) : null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(project?.image_url || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { register, handleSubmit, control, setValue, watch, formState: { errors } } = useForm<FormValues>({
@@ -52,16 +68,6 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
     }
   }, [watchTitle, setValue, isEditMode, project?.slug]);
 
-  function getFileNameFromUrl(url: string): string {
-    try {
-      const urlObj = new URL(url);
-      const parts = urlObj.pathname.split('/');
-      return parts.filter(Boolean).pop() || url;
-    } catch (error) {
-      return url;
-    }
-  }
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -77,12 +83,14 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
 
       setImageFile(file);
       setImageFileName(file.name);
+      setImagePreviewUrl(URL.createObjectURL(file));
     }
   };
 
   const clearImage = () => {
     setImageFile(null);
     setImageFileName(null);
+    setImagePreviewUrl(null);
   };
 
   const uploadImage = async (file: File) => {
@@ -98,6 +106,7 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
       });
 
     if (uploadError) {
+      console.error('Supabase image upload error:', uploadError);
       throw uploadError;
     }
 
@@ -120,7 +129,7 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
         imageUrl = null;
       }
 
-      const sanitizedDescription = data.description === '<p><br></p>' ? '' : data.description;
+      const sanitizedDescription = data.description.replace(/<(?:.|\n)*?>/gm, '').trim() === '' ? '' : data.description;
 
       if (isEditMode && project) {
         const { error } = await supabase
@@ -133,7 +142,10 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
           })
           .eq('id', project.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase project update error:', error);
+          throw error;
+        }
 
         toast.success('Project updated successfully');
       } else {
@@ -141,11 +153,13 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
           .from('projects')
           .insert({
             ...data,
-            description: sanitizedDescription,
             image_url: imageUrl,
           });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase project creation error:', error);
+          throw error;
+        }
 
         toast.success('Project created successfully');
       }
@@ -159,30 +173,79 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
     }
   };
 
-  const quillModules = {
-    toolbar: [
-      [{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'align': [] }],
-      ['link'],
-      ['clean']
-    ],
+  const customSelectStyles = {
+    control: (provided: any, state: any) => ({
+      ...provided,
+      backgroundColor: 'var(--bg-white)',
+      borderColor: state.isFocused
+        ? 'var(--border-blue-500)'
+        : (errors.categories ? 'var(--border-red-500)' : 'var(--border-neutral-300)'),
+      boxShadow: state.isFocused ? '0 0 0 1px var(--ring-blue-500)' : 'none',
+      borderRadius: '0.5rem',
+      minHeight: '42px',
+      color: 'var(--text-neutral-900)',
+      transition: 'all 0.2s ease-in-out',
+      '&:hover': {
+        borderColor: state.isFocused ? 'var(--border-blue-500)' : 'var(--border-neutral-400)',
+      },
+    }),
+    singleValue: (provided: any) => ({
+      ...provided,
+      color: 'var(--text-neutral-900)',
+    }),
+    placeholder: (provided: any) => ({
+      ...provided,
+      color: 'var(--text-neutral-400)',
+    }),
+    menu: (provided: any) => ({
+      ...provided,
+      backgroundColor: 'var(--bg-white)',
+      borderRadius: '0.5rem',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      border: '1px solid var(--border-neutral-300)',
+    }),
+    option: (provided: any, state: any) => ({
+      ...provided,
+      backgroundColor: state.isSelected
+        ? 'var(--color-primary-500)'
+        : state.isFocused
+        ? 'var(--bg-neutral-100)'
+        : 'var(--bg-white)',
+      color: state.isSelected
+        ? 'white'
+        : 'var(--text-neutral-900)',
+      '&:active': {
+        backgroundColor: 'var(--color-primary-600)',
+      },
+    }),
+    multiValue: (provided: any) => ({
+      ...provided,
+      backgroundColor: 'var(--bg-primary-50)',
+      borderRadius: '0.5rem',
+      color: 'var(--text-primary-700)',
+    }),
+    multiValueLabel: (provided: any) => ({
+      ...provided,
+      color: 'var(--text-primary-700)',
+    }),
+    multiValueRemove: (provided: any) => ({
+      ...provided,
+      color: 'var(--text-primary-700)',
+      '&:hover': {
+        backgroundColor: 'var(--bg-primary-100)',
+        color: 'var(--text-primary-800)',
+      },
+    }),
   };
 
-  const quillFormats = [
-    'header', 'font', 'list', 'bullet', 'bold', 'italic', 'underline',
-    'strike', 'color', 'background', 'align', 'link'
-  ];
-
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
+    <div className="w-full px-4 py-8 md:py-12">
       <h1 className="text-3xl md:text-4xl font-extrabold text-neutral-900 dark:text-neutral-50 mb-8 text-center">
         {isEditMode ? 'Edit Project' : 'Create New Project'}
       </h1>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl mx-auto bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-6 md:p-8 space-y-6 md:space-y-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full md:max-w-3xl mx-auto bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8" style={{ overflow: 'visible' }}>
+
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <Input
             id="title"
@@ -196,7 +259,13 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
             id="slug"
             label="Slug (URL friendly name)"
             placeholder="project-name"
-            {...register('slug', { required: 'Slug is required' })}
+            {...register('slug', {
+              required: 'Slug is required',
+              pattern: {
+                value: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+                message: 'Slug must be lowercase letters, numbers, and hyphens only.'
+              }
+            })}
             error={errors.slug?.message}
           />
         </div>
@@ -221,21 +290,12 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
                 ${errors.description ? 'border-red-500 dark:border-red-400 ring-red-500' : 'border-neutral-300 dark:border-neutral-700 ring-blue-500'}
                 focus-within:ring-2 focus-within:border-blue-500 dark:focus-within:border-blue-500 border`
               }>
-                <ReactQuill
-                  theme="snow"
+                <RichTextEditor
                   value={field.value}
                   onChange={field.onChange}
-                  onBlur={() => field.onBlur()} // Ensure onBlur is called
-                  modules={quillModules}
-                  formats={quillFormats}
+                  onBlur={() => field.onBlur()}
                   placeholder="Enter project description with rich text formatting..."
-                  className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100" // Apply background and text color to Quill container
-                  // Directly target Quill's content area for text color
-                  // You might need a global CSS file for more detailed Quill overrides,
-                  // especially for toolbar background/colors in dark mode.
-                  // For example, in a global.css:
-                  // .dark .ql-toolbar.ql-snow { background-color: theme('colors.neutral.800'); border-color: theme('colors.neutral.700'); }
-                  // .dark .ql-editor { color: theme('colors.neutral.100'); }
+                  minHeight="180px"
                 />
               </div>
             )}
@@ -274,57 +334,50 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
           />
         </div>
 
+        {/* --- Bagian Kategori dengan React-Select --- */}
         <div>
-          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-3">
+          <label htmlFor="categories" className="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2">
             Categories
           </label>
           <Controller
-            control={control}
             name="categories"
-            rules={{ required: 'At least one category is required' }}
+            control={control}
+            rules={{
+              required: 'At least one category is required',
+              validate: (value) => (value && value.length > 0) || 'At least one category is required',
+            }}
             render={({ field }) => (
-              <div className="flex flex-wrap gap-2">
-                {CATEGORIES.map((category) => {
-                  const isSelected = field.value.includes(category);
-                  return (
-                    <button
-                      key={category}
-                      type="button"
-                      className={`px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 shadow-sm
-                        ${isSelected
-                          ? 'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800'
-                          : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-600'
-                        }`}
-                      onClick={() => {
-                        if (isSelected) {
-                          field.onChange(field.value.filter((c: string) => c !== category));
-                        } else {
-                          field.onChange([...field.value, category]);
-                        }
-                      }}
-                    >
-                      {category}
-                      {isSelected && <X className="inline ml-1 h-3 w-3" />}
-                    </button>
-                  );
-                })}
-              </div>
+              <Select
+                {...field}
+                id="categories"
+                options={categoryOptions}
+                isMulti
+                classNamePrefix="react-select"
+                placeholder="Select categories..."
+                styles={customSelectStyles}
+                value={field.value ? categoryOptions.filter(option => field.value.includes(option.value)) : []}
+                onChange={(selectedOptions) => {
+                  field.onChange(selectedOptions ? selectedOptions.map(option => option.value) : []);
+                }}
+                maxMenuHeight={200}
+              />
             )}
           />
           {errors.categories && (
             <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.categories.message}</p>
           )}
         </div>
+        {/* --- Akhir Bagian Kategori dengan React-Select --- */}
 
         <div>
           <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-3">
             Project Image
           </label>
 
-          {imageFileName ? (
-            <div className="relative mb-4 flex items-center justify-between p-4 bg-neutral-100 dark:bg-neutral-700 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-600">
-              <div className="flex items-center">
-                <Upload className="w-5 h-5 mr-3 text-neutral-500 dark:text-neutral-400" />
+          {imagePreviewUrl ? (
+            <div className="relative mb-4 flex flex-col sm:flex-row items-center justify-between p-4 bg-neutral-100 dark:bg-neutral-700 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-600">
+              <div className="flex items-center flex-1 sm:pr-4 mb-3 sm:mb-0 w-full sm:w-auto">
+                <img src={imagePreviewUrl} alt="Project Preview" className="w-16 h-16 object-cover rounded mr-4 flex-shrink-0" />
                 <span className="text-sm font-medium text-neutral-800 dark:text-neutral-100 truncate">
                   {imageFileName}
                 </span>
@@ -332,15 +385,17 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
               <button
                 type="button"
                 onClick={clearImage}
-                className="p-1 bg-white dark:bg-neutral-800 rounded-full shadow-md hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200"
+                className="p-1 bg-white dark:bg-neutral-800 rounded-full shadow-md hover:bg-red-50 dark:hover:bg-red-900 transition-colors duration-200 flex-shrink-0 self-end sm:self-center"
                 aria-label="Remove image"
               >
                 <X className="h-4 w-4 text-red-600 dark:text-red-400" />
               </button>
             </div>
           ) : (
-            <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-56 border-2 border-dashed rounded-xl cursor-pointer bg-neutral-50 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors duration-200">
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+            <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full
+              min-h-40 py-12 md:h-56
+              border-2 border-dashed rounded-xl cursor-pointer bg-neutral-50 dark:bg-neutral-800 border-neutral-300 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors duration-200">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
                 <Upload className="w-10 h-10 mb-3 text-neutral-400 dark:text-neutral-500" />
                 <p className="mb-2 text-sm text-neutral-500 dark:text-neutral-400">
                   <span className="font-semibold">Click to upload</span> or drag and drop
@@ -358,19 +413,19 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
           )}
         </div>
 
-        <div className="flex justify-end space-x-3 pt-6 border-t border-neutral-100 dark:border-neutral-700">
+        <div className="flex flex-col-reverse sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-6 border-t border-neutral-100 dark:border-neutral-700">
           <Button
             type="button"
             variant="outline"
             onClick={() => navigate('/admin')}
-            className="px-5 py-2.5 text-base"
+            className="w-full sm:w-auto px-5 py-2.5 text-base"
           >
             Cancel
           </Button>
           <Button
             type="submit"
             isLoading={isSubmitting}
-            className="px-5 py-2.5 text-base"
+            className="w-full sm:w-auto px-5 py-2.5 text-base"
           >
             {isEditMode ? 'Update Project' : 'Create Project'}
           </Button>

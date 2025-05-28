@@ -9,7 +9,7 @@ import Button from '../../components/ui/Button';
 import ShareModal from '../../components/projects/ShareModal';
 import ProjectCard from '../../components/projects/ProjectCard';
 import { formatDate, STATUS_COLORS } from '../../lib/utils';
-import DOMPurify from 'dompurify'; // Import DOMPurify
+import DOMPurify from 'dompurify';
 
 export default function ProjectDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -106,7 +106,7 @@ export default function ProjectDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-2 bg-white dark:bg-neutral-800 rounded-xl shadow-md overflow-hidden p-6 md:p-8 flex flex-col items-center">
+          <div className="md:col-span-2 bg-white dark:bg-neutral-800 rounded-xl shadow-md p-6 md:p-8 flex flex-col items-center" style={{ overflow: 'visible' }}>
             <div className="w-full flex justify-between items-center mb-4 z-20">
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}>
                 {project.status}
@@ -145,29 +145,31 @@ export default function ProjectDetailPage() {
 
               {/* Add ql-editor class for correct Quill content styling */}
               <div
-                className="ql-editor description-content max-w-none mb-6 text-neutral-700 dark:text-neutral-300 text-left"
+                className="ql-editor description-content max-w-none mb-6 text-left"
                 dangerouslySetInnerHTML={renderDescriptionHtml(project.description)}
               />
+            </div> {/* Penutup div.text-center w-full */}
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-6 border-t border-neutral-200 dark:border-neutral-700">
-                <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-4 sm:mb-0">
-                  Published on {formatDate(project.created_at)}
-                </div>
-
-                {project.project_url && (
-                  <a
-                    href={project.project_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                  >
-                    Visit Project
-                    <ExternalLink className="ml-2 h-4 w-4" />
-                  </a>
-                )}
+            {/* Perbaikan: Mengubah justify-start menjadi sm:justify-end untuk align ke kanan di layar besar */}
+            <div className="flex flex-row items-center justify-start sm:justify-end gap-x-4 pt-6 border-t border-neutral-200 dark:border-neutral-700 w-full">
+              <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-4 sm:mb-0">
+                Published on {formatDate(project.created_at)}
               </div>
-            </div>
-          </div>
+
+              {project.project_url && (
+                <a
+                  href={project.project_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 w-full sm:w-auto flex-1 justify-center" /* MENAMBAHKAN justify-center */
+                >
+                  Visit Project
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </a>
+              )}
+            </div> {/* Penutup div Published on & Visit Project */}
+
+          </div> {/* Penutup div.md:col-span-2 (kartu utama) */}
 
           {relatedProjects.length > 0 && (
             <div className="md:col-span-1">

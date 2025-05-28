@@ -5,7 +5,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        // ... (warna yang sudah ada)
         background: {
           light: '#F8FAFC',
           dark: '#0E0B20',
@@ -60,13 +59,30 @@ export default {
           '900': '#870091',
           '950': '#5E006A',
         },
+        // --- MENAMBAHKAN WARNA DARI TEXT EDITOR (QUILL) ---
+        quill: {
+          'black': '#000000',
+          'white': '#FFFFFF',
+          'red': '#e60000',
+          'orange': '#ff9900',
+          'yellow': '#ffff00',
+          'green': '#008a00',
+          'blue': '#0066cc',
+          'purple': '#9933ff',
+          'light-grey-bg': '#f0f0f0',
+          'medium-grey-stroke': '#444',
+          'dark-grey-border': '#ccc',
+          'syntax-bg': '#23241f',
+          'syntax-text': '#f8f8f2',
+        },
+        // --- AKHIR PENAMBAHAN WARNA DARI TEXT EDITOR ---
       },
-      fontFamily: { // MODIFIED: Tambahkan konfigurasi font family
-        sans: ['"Inter"', 'sans-serif'], // Contoh: Gunakan Inter (perlu diimport di index.css)
-        mono: ['"Space Mono"', 'monospace'], // Contoh: Font monospaced yang futuristik
+      fontFamily: {
+        sans: ['"Inter"', 'sans-serif'],
+        mono: ['"Space Mono"', 'monospace'],
       },
-      boxShadow: { // MODIFIED: Tambahkan shadow kustom untuk glow
-        'glow-sm': '0 0 8px rgba(74, 144, 226, 0.4), 0 0 16px rgba(224, 64, 251, 0.2)', // Gabungan primary dan secondary
+      boxShadow: {
+        'glow-sm': '0 0 8px rgba(74, 144, 226, 0.4), 0 0 16px rgba(224, 64, 251, 0.2)',
         'glow-md': '0 0 15px rgba(74, 144, 226, 0.6), 0 0 30px rgba(224, 64, 251, 0.4)',
         'glow-lg': '0 0 25px rgba(74, 144, 226, 0.8), 0 0 50px rgba(224, 64, 251, 0.6)',
       },
@@ -75,18 +91,9 @@ export default {
         'fade-in': 'fadeIn 0.8s ease-out forwards',
       },
       animationDelay: {
-        '0': '0s',
-        '100': '0.1s',
-        '150': '0.15s',
-        '200': '0.2s',
-        '300': '0.3s',
-        '400': '0.4s',
-        '500': '0.5s',
-        '600': '0.6s',
-        '700': '0.7s',
-        '800': '0.8s',
-        '900': '0.9s',
-        '1000': '1s',
+        '0': '0s', '100': '0.1s', '150': '0.15s', '200': '0.2s', '300': '0.3s',
+        '400': '0.4s', '500': '0.5s', '600': '0.6s', '700': '0.7s', '800': '0.8s',
+        '900': '0.9s', '1000': '1s',
       },
     },
   },
