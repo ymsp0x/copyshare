@@ -1,21 +1,24 @@
+// project/src/components/layout/Navbar.tsx
 import { useState, useDeferredValue, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, Menu, X, Tag, Sun, Moon } from 'lucide-react';
 import { TextLogo } from '../ui/Logo';
 import { cn } from '../../lib/utils';
-import { CATEGORIES } from '../../lib/utils';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useCategories } from '../../hooks/useCategories';
 
 interface NavbarProps {
   onSearch?: (query: string) => void;
   onCategorySelect?: (category: string | null) => void;
   selectedCategory?: string | null;
+  showSearchAndCategories?: boolean;
 }
 
 export default function Navbar({
   onSearch,
   onCategorySelect,
-  selectedCategory
+  selectedCategory,
+  showSearchAndCategories = false,
 }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,22 +28,25 @@ export default function Navbar({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { theme, toggleTheme } = useTheme();
 
-  // Effect untuk mengirimkan query pencarian yang sudah di-debounce
+  // Use the new useCategories hook to fetch categories dynamically
+  const { categoryNames, isLoading: areCategoriesLoading, error: categoriesError } = useCategories();
+
+  // Effect to debounce search query and pass it up
   useEffect(() => {
-    if (onSearch) {
+    if (onSearch && showSearchAndCategories) {
       if (deferredSearchQuery.length > 0) {
          onSearch(deferredSearchQuery);
       } else if (selectedCategory !== null) {
-         // Jika search bar kosong TAPI ada kategori terpilih, jangan lakukan pencarian proyek.
-         // Biarkan filter kategori yang bekerja.
+         // If search bar is empty BUT a category is selected, don't trigger search
+         // This allows category filter to work independently of search input
       } else {
-         // Jika search bar kosong DAN tidak ada kategori terpilih, reset pencarian
+         // If search bar is empty AND no category is selected, reset search
          onSearch('');
       }
     }
-  }, [deferredSearchQuery, onSearch, selectedCategory]);
+  }, [deferredSearchQuery, onSearch, selectedCategory, showSearchAndCategories]);
 
-  // Effect untuk menangani klik di luar dropdown kategori
+  // Effect to handle clicks outside the category dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -61,9 +67,7 @@ export default function Navbar({
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    // Selalu buka dropdown kategori jika ada teks atau jika input kosong tapi ingin melihat semua kategori
     setIsCategoryDropdownOpen(true);
-    // Jika search bar dikosongkan dan sebelumnya ada kategori terpilih, reset kategori
     if (e.target.value.length === 0 && selectedCategory !== null) {
       onCategorySelect?.(null);
     }
@@ -71,25 +75,24 @@ export default function Navbar({
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSearch) {
-      onSearch(searchQuery); // Panggil langsung saat submit
+    if (onSearch && showSearchAndCategories) {
+      onSearch(searchQuery);
     }
-    setIsCategoryDropdownOpen(false); // Tutup dropdown setelah submit
+    setIsCategoryDropdownOpen(false);
   };
 
   const handleCategoryClick = (category: string | null) => {
-    onCategorySelect?.(category); // Pilih kategori
-    setSearchQuery(''); // Kosongkan search query saat kategori dipilih
-    setIsCategoryDropdownOpen(false); // Tutup dropdown
+    onCategorySelect?.(category);
+    setSearchQuery('');
+    setIsCategoryDropdownOpen(false);
   };
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
-  const showSearchAndCategories = location.pathname === '/';
-
-  // Filter kategori yang ditampilkan di dropdown berdasarkan searchQuery
-  const filteredCategories = CATEGORIES.filter(category =>
+  // Filter categories that are displayed in the dropdown based on searchQuery
+  // Now uses the dynamically fetched categoryNames
+  const filteredCategories = categoryNames.filter(category =>
     category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -103,6 +106,7 @@ export default function Navbar({
             </Link>
           </div>
 
+          {/* Desktop Search and Categories */}
           {showSearchAndCategories && (
             <div className="hidden md:block flex-1 max-w-md mx-8 relative">
               <form onSubmit={handleSearchSubmit} className="relative">
@@ -114,14 +118,14 @@ export default function Navbar({
                   value={searchQuery}
                   onChange={handleSearchChange}
                   onFocus={() => setIsCategoryDropdownOpen(true)}
-                  name="desktop_search_query" // <--- TAMBAHKAN INI
+                  name="desktop_search_query"
                 />
                 <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-500 dark:text-gray-400" />
               </form>
 
               {/* Dropdown Kategori */}
               {isCategoryDropdownOpen && (searchQuery.length > 0 || selectedCategory === null || searchInputRef.current?.matches(':focus')) && (
-                <div className="category-dropdown absolute left-0 right-0 mt-2 bg-white/10 dark:bg-neutral-800/20 border border-gray-200/20 dark:border-neutral-700/50 rounded-md shadow-lg py-1 z-10 max-h-60 overflow-y-auto backdrop-blur-md"> {/* MODIFIED: Tambahkan backdrop-filter dan warna latar belakang transparan */}
+                <div className="category-dropdown absolute left-0 right-0 mt-2 bg-white/10 dark:bg-neutral-800/20 border border-gray-200/20 dark:border-neutral-700/50 rounded-md shadow-lg py-1 z-10 max-h-60 overflow-y-auto backdrop-blur-md">
                   {/* Tombol 'All' */}
                   <button
                     onClick={() => handleCategoryClick(null)}
@@ -133,7 +137,11 @@ export default function Navbar({
                     <Tag className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" /> All Projects
                   </button>
                   <div className="border-t border-gray-100 dark:border-neutral-700 my-1"></div>
-                  {filteredCategories.length > 0 ? (
+                  {areCategoriesLoading ? (
+                    <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">Loading categories...</div>
+                  ) : categoriesError ? (
+                    <div className="px-4 py-2 text-sm text-red-500 dark:text-red-400">Error loading categories.</div>
+                  ) : filteredCategories.length > 0 ? (
                     filteredCategories.map((category) => (
                       <button
                         key={category}
@@ -157,9 +165,25 @@ export default function Navbar({
           <div className="hidden md:flex items-center space-x-4">
             <Link
               to="/"
-              className="px-3 py-2 rounded-md text-sm font-medium text-text-dark dark:text-text-light hover:text-primary-600 dark:hover:text-primary-400"
+              className={cn(
+                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                location.pathname === '/'
+                  ? "text-primary-600 dark:text-primary-400"
+                  : "text-text-dark dark:text-text-light hover:text-primary-600 dark:hover:text-primary-400"
+              )}
             >
               HOME
+            </Link>
+            <Link
+              to="/projects"
+              className={cn(
+                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                location.pathname === '/projects' || location.pathname.startsWith('/project/')
+                  ? "text-primary-600 dark:text-primary-400"
+                  : "text-text-dark dark:text-text-light hover:text-primary-600 dark:hover:text-primary-400"
+              )}
+            >
+              PROJECTS
             </Link>
             {/* Tombol Toggle Tema */}
             <button
@@ -214,12 +238,12 @@ export default function Navbar({
                       className="w-full rounded-full pl-10 pr-4 py-2 border border-gray-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-900 text-text-dark dark:text-text-light placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-500 dark:focus:border-primary-500"
                       value={searchQuery}
                       onChange={handleSearchChange}
-                      name="mobile_search_query" // <--- TAMBAHKAN INI
+                      name="mobile_search_query"
                     />
                     <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-500 dark:text-gray-400" />
                   </form>
                   {isCategoryDropdownOpen && (searchQuery.length > 0 || selectedCategory === null || searchInputRef.current?.matches(':focus')) && (
-                    <div className="category-dropdown absolute left-0 right-0 mt-2 bg-white/10 dark:bg-neutral-800/20 border border-gray-200/20 dark:border-neutral-700/50 rounded-md shadow-lg py-1 z-10 max-h-60 overflow-y-auto backdrop-blur-md"> {/* MODIFIED: Tambahkan backdrop-filter dan warna latar belakang transparan */}
+                    <div className="category-dropdown absolute left-0 right-0 mt-2 bg-white/10 dark:bg-neutral-800/20 border border-gray-200/20 dark:border-neutral-700/50 rounded-md shadow-lg py-1 z-10 max-h-60 overflow-y-auto backdrop-blur-md">
                       <button
                         onClick={() => { handleCategoryClick(null); closeMenu(); }}
                         className={cn(
@@ -230,7 +254,12 @@ export default function Navbar({
                         <Tag className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" /> All Projects
                       </button>
                       <div className="border-t border-gray-100 dark:border-neutral-700 my-1"></div>
-                      {filteredCategories.length > 0 ? (
+                      {/* Show loading/error states for categories in mobile dropdown */}
+                      {areCategoriesLoading ? (
+                        <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">Loading categories...</div>
+                      ) : categoriesError ? (
+                        <div className="px-4 py-2 text-sm text-red-500 dark:text-red-400">Error loading categories.</div>
+                      ) : filteredCategories.length > 0 ? (
                         filteredCategories.map((category) => (
                           <button
                             key={category}
@@ -256,6 +285,13 @@ export default function Navbar({
                 onClick={closeMenu}
               >
                 HOME
+              </Link>
+              <Link
+                to="/projects"
+                className="block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-text-light hover:bg-gray-50 dark:hover:bg-neutral-800 hover:text-primary-600 dark:hover:text-primary-400"
+                onClick={closeMenu}
+              >
+                PROJECTS
               </Link>
             </div>
           </div>

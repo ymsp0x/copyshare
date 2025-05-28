@@ -4,15 +4,12 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import React, { Suspense, lazy } from 'react'; // Import React, Suspense, dan lazy
+import React, { Suspense, lazy } from 'react';
 
-// Import CSS global (tetap di main.tsx)
-// import 'react-quill/dist/quill.snow.css';
-// import './index.css';
-
-// Gunakan React.lazy untuk impor komponen halaman
+// Use React.lazy for page components
 const LandingPage = lazy(() => import('./pages/public/LandingPage'));
 const ProjectDetailPage = lazy(() => import('./pages/public/ProjectDetailPage'));
+const PublicProjectDashboard = lazy(() => import('./pages/public/PublicProjectDashboard')); // New import
 
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -26,10 +23,7 @@ function App() {
         <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900 font-sans antialiased">
           <Router>
             <Toaster position="top-right" />
-            {/* Bungkus Routes dengan Suspense */}
             <Suspense fallback={
-              // Ini adalah fallback yang akan ditampilkan saat komponen dimuat
-              // Anda bisa membuat komponen loading yang lebih kompleks di sini
               <div className="min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-500"></div>
               </div>
@@ -37,6 +31,7 @@ function App() {
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/projects" element={<PublicProjectDashboard />} /> {/* New route for public dashboard */}
                 <Route path="/project/:slug" element={<ProjectDetailPage />} />
 
                 {/* Admin Routes */}
@@ -69,7 +64,7 @@ function App() {
                 {/* Fallback Route */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
-            </Suspense> {/* Penutup Suspense */}
+            </Suspense>
           </Router>
         </div>
       </ThemeProvider>

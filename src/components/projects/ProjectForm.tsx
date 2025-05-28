@@ -1,3 +1,4 @@
+// project/src/components/projects/ProjectForm.tsx
 import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -5,11 +6,12 @@ import { toast } from 'react-hot-toast';
 import { X, Upload } from 'lucide-react';
 import { Project } from '../../types/database.types';
 import { supabase } from '../../lib/supabase';
-import { slugify, CATEGORIES } from '../../lib/utils';
+import { slugify /* REMOVED CATEGORIES */ } from '../../lib/utils';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Select from 'react-select';
 import RichTextEditor from '../ui/RichTextEditor';
+import { useCategories } from '../../hooks/useCategories'; // IMPORT THE NEW HOOK
 
 interface ProjectFormProps {
   project?: Project;
@@ -24,11 +26,6 @@ type FormValues = {
   project_url: string;
   categories: string[];
 };
-
-const categoryOptions = CATEGORIES.map(category => ({
-  value: category,
-  label: category,
-}));
 
 function getFileNameFromUrl(url: string): string {
   try {
@@ -46,6 +43,15 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
   const [imageFileName, setImageFileName] = useState<string | null>(project?.image_url ? getFileNameFromUrl(project.image_url) : null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(project?.image_url || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Use the new useCategories hook to fetch categories dynamically
+  const { categoryNames, isLoading: areCategoriesLoading, error: categoriesError } = useCategories();
+  
+  // Format categories for react-select
+  const categoryOptions = categoryNames.map(category => ({
+    value: category,
+    label: category,
+  }));
 
   const { register, handleSubmit, control, setValue, watch, formState: { errors } } = useForm<FormValues>({
     defaultValues: {
@@ -67,6 +73,13 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
       }
     }
   }, [watchTitle, setValue, isEditMode, project?.slug]);
+
+  // Handle category loading/error for display to user
+  useEffect(() => {
+    if (categoriesError) {
+      toast.error(`Error loading categories: ${categoriesError}`);
+    }
+  }, [categoriesError]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -129,14 +142,16 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
         imageUrl = null;
       }
 
-      const sanitizedDescription = data.description.replace(/<(?:.|\n)*?>/gm, '').trim() === '' ? '' : data.description;
+      // Check if description is truly empty or just HTML tags
+      const strippedDescription = data.description.replace(/<(?:.|\n)*?>/gm, '').trim();
+      const finalDescription = strippedDescription === '' ? '' : data.description;
 
       if (isEditMode && project) {
         const { error } = await supabase
           .from('projects')
           .update({
             ...data,
-            description: sanitizedDescription,
+            description: finalDescription,
             image_url: imageUrl,
             updated_at: new Date().toISOString(),
           })
@@ -153,6 +168,7 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
           .from('projects')
           .insert({
             ...data,
+            description: finalDescription,
             image_url: imageUrl,
           });
 
@@ -350,7 +366,7 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
               <Select
                 {...field}
                 id="categories"
-                options={categoryOptions}
+                options={categoryOptions} // Use dynamically fetched options
                 isMulti
                 classNamePrefix="react-select"
                 placeholder="Select categories..."
@@ -360,11 +376,16 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
                   field.onChange(selectedOptions ? selectedOptions.map(option => option.value) : []);
                 }}
                 maxMenuHeight={200}
+                isLoading={areCategoriesLoading} // Show loading state for categories
+                isDisabled={areCategoriesLoading || categoriesError !== null} // Disable if loading or error
               />
             )}
           />
           {errors.categories && (
             <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.categories.message}</p>
+          )}
+          {categoriesError && (
+            <p className="mt-2 text-sm text-red-600 dark:text-red-400">Error loading categories.</p>
           )}
         </div>
         {/* --- Akhir Bagian Kategori dengan React-Select --- */}

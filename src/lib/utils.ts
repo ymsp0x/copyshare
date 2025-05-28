@@ -1,5 +1,7 @@
+// project/src/lib/utils.ts
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { supabase } from './supabase'; // Ensure supabase is imported for uploadImage
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -30,20 +32,7 @@ export const STATUS_COLORS = {
   'Selesai': 'bg-gray-100 text-gray-800',
 };
 
-export const CATEGORIES = [
-  'AI & Data',
-  'Airdrop',
-  'Alpha Project',
-  'DeFi',
-  'Early-Access',
-  'Gaming & Metaverse',
-  'Identity',
-  'Infra',
-  'Privacy & Security',
-  'Social',
-  'Tooling',
-  'Wallet'
-];
+// CATEGORIES array has been REMOVED from here, as it will be fetched dynamically.
 
 export async function uploadImage(file: File, bucket = 'project-images') {
   const timestamp = new Date().getTime();

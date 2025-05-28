@@ -1,8 +1,9 @@
+// project/src/components/projects/ProjectGrid.tsx
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { Project } from '../../types/database.types';
 import ProjectCard from './ProjectCard';
-import ProjectCardSkeleton from './ProjectCardSkeleton'; // Import the skeleton component
+import ProjectCardSkeleton from './ProjectCardSkeleton';
 import ShareModal from './ShareModal';
 import { supabase } from '../../lib/supabase';
 
@@ -27,12 +28,24 @@ export default function ProjectGrid({ searchQuery = '', selectedCategory }: Proj
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (searchQuery) {
-          query = query.ilike('title', `%${searchQuery}%`);
-        }
+        const trimmedSearchQuery = searchQuery.trim();
 
-        if (selectedCategory) {
+        if (trimmedSearchQuery && selectedCategory) {
+          // If both search query and a category are selected, filter within the category AND search titles/slugs.
+          query = query
+            .filter('categories', 'cs', `["${selectedCategory}"]`)
+            .or(
+              `title.ilike.%${trimmedSearchQuery}%,slug.ilike.%${trimmedSearchQuery}%`
+            );
+        } else if (selectedCategory) {
+          // If only a category is selected, filter by that category.
           query = query.filter('categories', 'cs', `["${selectedCategory}"]`);
+        } else if (trimmedSearchQuery) {
+          // If only a general search query is present (no specific category selected via dropdown),
+          // search across titles, slugs, AND categories.
+          query = query.or(
+            `title.ilike.%${trimmedSearchQuery}%,slug.ilike.%${trimmedSearchQuery}%,categories.cs.["${trimmedSearchQuery}"]`
+          );
         }
 
         const { data, error } = await query;

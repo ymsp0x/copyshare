@@ -1,3 +1,4 @@
+// project/src/pages/public/ProjectDetailPage.tsx
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -33,14 +34,13 @@ export default function ProjectDetailPage() {
         }
         setProject(mainProject);
 
-        let relatedQuery = supabase
+        // Fetch related projects excluding the current one
+        const { data: otherProjects, error: otherError } = await supabase
           .from('projects')
           .select('*')
-          .neq('slug', slug)
+          .neq('slug', slug) // Exclude the current project
           .order('created_at', { ascending: false })
           .limit(4);
-
-        const { data: otherProjects, error: otherError } = await relatedQuery;
 
         if (otherError) {
           console.error("Error fetching other projects:", otherError);
@@ -75,7 +75,7 @@ export default function ProjectDetailPage() {
   if (!project) {
     return (
       <div className="min-h-screen bg-neutral-50 dark:bg-neutral-900">
-        <Navbar />
+        <Navbar showSearchAndCategories={false} />
         <div className="container mx-auto px-4 py-12 text-center text-neutral-900 dark:text-neutral-100">
           <h1 className="text-2xl font-bold mb-4">Project Not Found</h1>
           <p className="text-neutral-600 dark:text-neutral-300 mb-8">The project you are looking for does not exist or has been removed.</p>
@@ -95,11 +95,11 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
-      <Navbar />
+      <Navbar showSearchAndCategories={false} />
 
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
-          <Link to="/" className="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300">
+          <Link to="/projects" className="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Projects
           </Link>
@@ -143,14 +143,12 @@ export default function ProjectDetailPage() {
                 ))}
               </div>
 
-              {/* Add ql-editor class for correct Quill content styling */}
               <div
                 className="ql-editor description-content max-w-none mb-6 text-left"
                 dangerouslySetInnerHTML={renderDescriptionHtml(project.description)}
               />
-            </div> {/* Penutup div.text-center w-full */}
+            </div>
 
-            {/* Perbaikan: Mengubah justify-start menjadi sm:justify-end untuk align ke kanan di layar besar */}
             <div className="flex flex-row items-center justify-start sm:justify-end gap-x-4 pt-6 border-t border-neutral-200 dark:border-neutral-700 w-full">
               <div className="text-sm text-neutral-500 dark:text-neutral-400 mb-4 sm:mb-0">
                 Published on {formatDate(project.created_at)}
@@ -161,22 +159,25 @@ export default function ProjectDetailPage() {
                   href={project.project_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 w-full sm:w-auto flex-1 justify-center" /* MENAMBAHKAN justify-center */
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 w-full sm:w-auto flex-1 justify-center"
                 >
                   Visit Project
                   <ExternalLink className="ml-2 h-4 w-4" />
                 </a>
               )}
-            </div> {/* Penutup div Published on & Visit Project */}
+            </div>
 
-          </div> {/* Penutup div.md:col-span-2 (kartu utama) */}
+          </div>
 
           {relatedProjects.length > 0 && (
             <div className="md:col-span-1">
               <h2 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">More Projects</h2>
               <div className="grid grid-cols-1 gap-4">
                 {relatedProjects.map((rp) => (
-                  <ProjectCard key={rp.id} project={rp} showActions={false} />
+                  // Wrap ProjectCard in a Link to make the whole card clickable
+                  <Link key={rp.id} to={`/project/${rp.slug}`} className="block">
+                    <ProjectCard project={rp} showActions={false} />
+                  </Link>
                 ))}
               </div>
             </div>
