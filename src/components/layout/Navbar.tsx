@@ -29,7 +29,7 @@ export default function Navbar({
   const { theme, toggleTheme } = useTheme();
 
   // Use the new useCategories hook to fetch categories dynamically
-  const { categoryNames, isLoading: areCategoriesLoading, error: categoriesError } = useCategories();
+  const { categoryNames, isLoading: areCategoriesLoading, error: categoriesError } = useCategories(); //
 
   // Effect to debounce search query and pass it up
   useEffect(() => {
@@ -185,17 +185,29 @@ export default function Navbar({
             >
               PROJECTS
             </Link>
-            <Link // Tautan Airdrop yang diperbarui
+            <Link
               to="/airdrop"
               className={cn(
                 "px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                location.pathname === '/airdrop' // Periksa path baru
+                location.pathname === '/airdrop'
                   ? "text-primary-600 dark:text-primary-400"
                   : "text-text-dark dark:text-text-light hover:text-primary-600 dark:hover:text-primary-400"
               )}
             >
-              AIRDROP {/* Label diperbarui */}
+              AIRDROP
             </Link>
+            {/* NEW: Add Link for Degen Monitor Page */}
+            <Link
+              to="/degen-monitor"
+              className={cn(
+                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                location.pathname === '/degen-monitor'
+                  ? "text-primary-600 dark:text-primary-400"
+                  : "text-text-dark dark:text-text-light hover:text-primary-600 dark:hover:text-primary-400"
+              )}
+            >
+              DEGEN MONITOR
+            </Link> {/* */}
             {/* Tombol Toggle Tema */}
             <button
               onClick={toggleTheme}
@@ -303,7 +315,7 @@ export default function Navbar({
               >
                 PROJECTS
               </Link>
-              <Link // Tautan Airdrop yang diperbarui untuk mobile
+              <Link
                 to="/airdrop"
                 className={cn(
                   "block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-text-light hover:bg-gray-50 dark:hover:bg-neutral-800 hover:text-primary-600 dark:hover:text-primary-400",
@@ -311,8 +323,19 @@ export default function Navbar({
                 )}
                 onClick={closeMenu}
               >
-                AIRDROP {/* Label diperbarui */}
+                AIRDROP
               </Link>
+              {/* NEW: Add Link for Degen Monitor Page (mobile) */}
+              <Link
+                to="/degen-monitor"
+                className={cn(
+                  "block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-text-light hover:bg-gray-50 dark:hover:bg-neutral-800 hover:text-primary-600 dark:hover:text-primary-400",
+                  location.pathname === '/degen-monitor' ? 'text-primary-600 dark:text-primary-400' : ''
+                )}
+                onClick={closeMenu}
+              >
+                DEGEN MONITOR
+              </Link> {/* */}
             </div>
           </div>
         )}

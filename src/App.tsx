@@ -10,6 +10,8 @@ const LandingPage = lazy(() => import('./pages/public/LandingPage'));
 const ProjectDetailPage = lazy(() => import('./pages/public/ProjectDetailPage'));
 const PublicProjectDashboard = lazy(() => import('./pages/public/PublicProjectDashboard'));
 const AirdropPage = lazy(() => import('./pages/public/AirdropPage'));
+// NEW: Import DegenMonitorPage
+const DegenMonitorPage = lazy(() => import('./pages/public/DegenMonitorPage')); //
 
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -33,6 +35,8 @@ function App() {
                 <Route path="/projects" element={<PublicProjectDashboard />} />
                 <Route path="/project/:slug" element={<ProjectDetailPage />} />
                 <Route path="/airdrop" element={<AirdropPage />} />
+                {/* NEW: Add Route for Degen Monitor Page */}
+                <Route path="/degen-monitor" element={<DegenMonitorPage />} /> {/* */}
 
                 <Route path="/admin/login" element={<LoginPage />} />
                 <Route
