@@ -90,8 +90,11 @@ export default function DegenMonitorPage() {
   const [trades, setTrades] = useState<TradeInfo[]>([]);
   const [analyzedTransactions, setAnalyzedTransactions] = useState<AnalyzedTransaction[]>([]);
 
+  // error state untuk DegenMonitorPage
+  const [error, setError] = useState<string | null>(null); //
+
   // onChainDataResponse.data adalah BackendOnChainData, onChainDataResponse.mint adalah mint yang diminta
-  const { data: onChainDataResponse, isLoading: isLoadingOnChain, error: onChainError, fetchOnChainData } = useTokenOnChainData(); //
+  const { data: onChainDataResponse, isLoading: isLoadingOnChain, error: onChainError, fetchOnChainData } = useTokenOnChainData();
 
 
   const [summaryStats, setSummaryStats] = useState({
@@ -108,7 +111,7 @@ export default function DegenMonitorPage() {
 
   useEffect(() => {
     if (!BACKEND_WS_URL) {
-      console.error("VITE_PUMP_FUN_WS_URL is not configured in your .env.local file.");
+      setError("VITE_PUMP_FUN_WS_URL is not configured in your .env.local file.");
       return;
     }
 
@@ -116,14 +119,15 @@ export default function DegenMonitorPage() {
 
     ws.onopen = () => {
       console.log('✅ Connected to Backend WebSocket server');
+      setError(null); // Clear any previous errors on successful connection
     };
 
     ws.onmessage = async (event) => {
       try {
         const message = JSON.parse(event.data);
         
-        if (message.type === 'newToken') { //
-            const token = message.data as TokenInfo; //
+        if (message.type === 'newToken') {
+            const token = message.data as TokenInfo;
             setTokens(prev => {
                 if (!prev.some(t => t.mint === token.mint)) {
                     const tokenWithDefaults: TokenInfo = {
@@ -142,29 +146,30 @@ export default function DegenMonitorPage() {
                 total: prev.total + 1,
                 [token.type]: (prev as any)[token.type] + 1,
             }));
-        } else if (message.type === 'tradeBatch') { //
-            const newTrades = message.data as TradeInfo[]; //
+        } else if (message.type === 'tradeBatch') {
+            const newTrades = message.data as TradeInfo[];
             setTrades(prev => [...newTrades, ...prev].slice(0, 50));
-        } else if (message.type === 'analyzedTxBatch') { //
-            const newAnalyzedTxs = message.data as AnalyzedTransaction[]; //
+        } else if (message.type === 'analyzedTxBatch') {
+            const newAnalyzedTxs = message.data as AnalyzedTransaction[];
             setAnalyzedTransactions(prev => [...newAnalyzedTxs, ...prev].slice(0, 50));
         }
       } catch (e) {
         console.error('Frontend: Error parsing WS message from backend:', e);
+        setError("Error parsing data from backend. Please check logs."); // Set error for DegenMonitorPage
       }
     };
 
     ws.onclose = () => console.log('Frontend: Disconnected from Backend WebSocket server.');
-    ws.onerror = error => {
-      console.error('Frontend: Backend WS error:', error);
-      setError("WebSocket error for on-chain data. Is backend running?"); // Update error state in DegenMonitorPage if WS connection fails
+    ws.onerror = (event) => { // Perbaikan: menggunakan 'event' bukan 'error' untuk menghindari bentrok dengan state
+      console.error('Frontend: Backend WS error event:', event); // Log event penuh
+      setError("WebSocket connection failed. Is backend running? Check browser console for CSP errors."); // Set error for DegenMonitorPage
     };
 
 
     return () => {
       ws.close();
     };
-  }, [BACKEND_WS_URL]);
+  }, [BACKEND_WS_URL, setError]); // Perbaikan: tambahkan setError ke dependensi
 
   const handleRowClick = (token: TokenInfo) => {
     if (selectedToken?.mint === token.mint) {
@@ -173,7 +178,7 @@ export default function DegenMonitorPage() {
       setSelectedToken(token); // Set selectedToken awal
       // Hanya fetch on-chain data jika belum ada atau untuk token yang berbeda
       if (!token.holdersCount || !token.recentOnChainTrades || onChainDataResponse?.mint !== token.mint) {
-          fetchOnChainData(token.mint, token.creator); //
+          fetchOnChainData(token.mint, token.creator);
       }
       setTimeout(() => {
           document.getElementById('token-detail-pane')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -183,7 +188,7 @@ export default function DegenMonitorPage() {
 
   useEffect(() => {
     // This effect updates selectedToken with on-chain data once it's available
-    if (selectedToken && onChainDataResponse && onChainDataResponse.mint === selectedToken.mint) { //
+    if (selectedToken && onChainDataResponse && onChainDataResponse.mint === selectedToken.mint) {
       setSelectedToken(prev => ({
         ...prev!, // Ensure prev is not null
         holdersCount: onChainDataResponse.data?.holdersCount,
@@ -192,7 +197,7 @@ export default function DegenMonitorPage() {
         recentOnChainTrades: onChainDataResponse.data?.pastTrades
       }));
     }
-  }, [onChainDataResponse, selectedToken]); //
+  }, [onChainDataResponse, selectedToken]);
 
 
   const handleCloseDetailPane = () => {
@@ -293,6 +298,13 @@ export default function DegenMonitorPage() {
           </Link>
         </div>
         <h1 className="text-3xl md:text-4xl font-extrabold text-neutral-900 dark:text-neutral-50 mb-6">🧠 Pump.fun Token Monitor</h1>
+
+        {error && (
+            <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 px-4 py-3 rounded relative mb-4" role="alert">
+                <strong className="font-bold">Error:</strong>
+                <span className="block sm:inline ml-2">{error}</span>
+            </div>
+        )}
 
         {/* Chart Container */}
         <div className="mb-8 bg-white dark:bg-neutral-800 p-4 rounded-lg shadow-sm border border-neutral-100 dark:border-neutral-700">
@@ -426,8 +438,8 @@ export default function DegenMonitorPage() {
                               `px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full`,
                               detailPaneFinalRiskLevel === 'Low' && 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100',
                               detailPaneFinalRiskLevel === 'Medium' && 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100',
-                              detailPaneFinalRiskLevel === 'High' && 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100',
-                              detailPaneFinalRiskLevel === 'Critical' && 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
+                              detailPaneFinalRiskLevel === 'High' && 'text-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-100',
+                              detailPaneFinalRiskLevel === 'Critical' && 'text-red-100 text-red-800 dark:bg-red-800 dark:text-red-100'
                         )}>
                           Risk: {detailPaneFinalRiskLevel}
                         </span>
