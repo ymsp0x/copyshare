@@ -5,8 +5,8 @@ import { toast } from 'react-hot-toast';
 import { ExternalLink } from 'lucide-react';
 import { Project } from '../../types/database.types';
 import { supabase } from '../../lib/supabase';
-import CategoryTags from '../../components/public/CategoryTags';
-import ProjectCard from '../../components/public/ProjectCard';
+import CategoryTags from '../../components/projects/CategoryTags';
+import ProjectCard from '../../components/projects/ProjectCard';
 
 function AirdropPage() {
   const { id } = useParams<{ id: string }>();
