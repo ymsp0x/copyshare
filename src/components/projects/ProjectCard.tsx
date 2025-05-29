@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { Share2 } from 'lucide-react';
 import { Project } from '../../types/database.types';
-import { cn, STATUS_COLORS } from '../../lib/utils';
+import { cn } from '../../lib/utils';
 import Button from '../ui/Button';
 import DOMPurify from 'dompurify';
 
@@ -10,6 +10,7 @@ interface ProjectCardProps {
   project: Project;
   showActions?: boolean;
   onShare?: (project: Project) => void;
+  variant?: 'default' | 'list';
 }
 
 const stripHtmlTags = (htmlString: string | null): string => {
@@ -19,29 +20,49 @@ const stripHtmlTags = (htmlString: string | null): string => {
   return doc.documentElement.textContent || '';
 };
 
-export default function ProjectCard({ project, showActions = true, onShare }: ProjectCardProps) {
+export default function ProjectCard({ project, showActions = true, onShare, variant = 'default' }: ProjectCardProps) {
   const defaultImage = 'https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2';
 
-  // Selalu tampilkan project.description (deskripsi artikel/blog penuh) di sini
   const displayedDescription = stripHtmlTags(project.description); 
 
   return (
-    <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg flex flex-col h-full group shadow-glow-sm dark:shadow-glow-sm hover:shadow-glow-md dark:hover:shadow-glow-md">
-      <div className="relative h-48 overflow-hidden rounded-xl">
+    <div className={cn(
+      "bg-white dark:bg-neutral-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg group",
+      "shadow-glow-sm dark:shadow-glow-sm hover:shadow-glow-md dark:hover:shadow-glow-md",
+      variant === 'default' ? "flex flex-col h-full" : "flex flex-row items-center p-4 h-auto"
+    )}>
+      <div className={cn(
+        "relative overflow-hidden",
+        variant === 'default' ? "h-48 rounded-xl" : "w-24 h-24 rounded-full flex-shrink-0 mr-4"
+      )}>
         <img
           src={project.image_url || defaultImage}
           alt={project.title}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className={cn(
+            "w-full h-full object-cover transition-transform duration-300",
+            variant === 'default' ? "group-hover:scale-105" : ""
+          )}
           loading="lazy"
         />
       </div>
 
-      <div className="p-5 flex-1 flex flex-col">
+      <div className={cn(
+        "flex-1 flex flex-col",
+        variant === 'default' ? "p-5" : "py-1"
+      )}>
         <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-2 line-clamp-2">{project.title}</h3>
 
-        <p className="text-neutral-600 dark:text-neutral-300 text-sm mb-4 line-clamp-3">
-          {displayedDescription}
-        </p>
+        {variant === 'default' && (
+          <p className="text-neutral-600 dark:text-neutral-300 text-sm mb-4 line-clamp-3">
+            {displayedDescription}
+          </p>
+        )}
+        {variant === 'list' && project.airdrop_description && (
+            <p className="text-neutral-600 dark:text-neutral-300 text-xs mb-2 line-clamp-2">
+              {stripHtmlTags(project.airdrop_description)}
+            </p>
+        )}
+
 
         <div className="flex flex-wrap gap-1.5 mt-auto mb-3">
           {project.categories?.slice(0, 3).map((category, index) => (

@@ -11,7 +11,6 @@ import ShareModal from '../../components/projects/ShareModal';
 import ProjectCard from '../../components/projects/ProjectCard';
 import { formatDate, STATUS_COLORS } from '../../lib/utils';
 import DOMPurify from 'dompurify';
-import { cn } from '../../lib/utils';
 
 export default function ProjectDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -37,12 +36,11 @@ export default function ProjectDetailPage() {
         }
         setProject(mainProject);
 
-        // Ambil proyek Airdrop terkait (tidak termasuk proyek utama) berdasarkan project_type
         let airdropQuery = supabase
           .from('projects')
           .select('*')
           .neq('slug', slug)
-          .in('project_type', '("airdrop", "both")') // <-- Filter berdasarkan project_type
+          .in('project_type', ['airdrop', 'both'])
           .order('created_at', { ascending: false })
           .limit(3);
 
@@ -57,12 +55,11 @@ export default function ProjectDetailPage() {
         }
         setRelatedAirdrops(airdrops || []);
 
-        // Ambil proyek biasa terkait (tidak termasuk proyek utama DAN project_type bukan airdrop/both)
         const { data: regularProjects, error: regularError } = await supabase
           .from('projects')
           .select('*')
           .neq('slug', slug)
-          .not('project_type', 'in', '("airdrop", "both")') // <-- Filter berdasarkan project_type
+          .not('project_type', 'in', ['airdrop', 'both'])
           .order('created_at', { ascending: false })
           .limit(3);
 
@@ -83,11 +80,10 @@ export default function ProjectDetailPage() {
     fetchProjectAndRelated();
   }, [slug, selectedAirdropStatusFilter]);
 
-  const renderDescriptionHtml = (htmlContent: string | null) => {
+  const renderHtmlContent = (htmlContent: string | null) => {
     if (!htmlContent) return { __html: '' };
     const cleanHtml = DOMPurify.sanitize(htmlContent, { USE_PROFILES: { html: true } });
-    const doc = new DOMParser().parseFromString(cleanHtml, 'text/html');
-    return doc.documentElement.textContent || '';
+    return { __html: cleanHtml };
   };
 
   if (isLoading) {
@@ -116,9 +112,13 @@ export default function ProjectDetailPage() {
     );
   }
 
-  const isAirdropProject = project.project_type === 'airdrop' || project.project_type === 'both'; // <-- Cek project_type
+  const isAirdropProject = project.project_type === 'airdrop' || project.project_type === 'both';
   const statusColor = STATUS_COLORS[project.status] || 'bg-neutral-100 text-neutral-800';
   const defaultImage = 'https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2';
+
+  // Tentukan deskripsi yang akan ditampilkan
+  const contentToDisplay = isAirdropProject ? project.airdrop_description : project.description;
+
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
@@ -172,9 +172,10 @@ export default function ProjectDetailPage() {
                 ))}
               </div>
 
+              {/* LOGIKA PERBAIKAN DI SINI UNTUK MENAMPILKAN DESKRIPSI YANG TEPAT */}
               <div
                 className="ql-editor description-content max-w-none mb-6 text-left"
-                dangerouslySetInnerHTML={renderDescriptionHtml(project.description)}
+                dangerouslySetInnerHTML={renderHtmlContent(contentToDisplay)}
               />
             </div>
 
@@ -198,7 +199,6 @@ export default function ProjectDetailPage() {
 
           </div>
 
-          {/* BAGIAN PROYEK LAINNYA YANG DIPISAHKAN */}
           <div className="md:col-span-1 space-y-8">
             {relatedAirdrops.length > 0 && (
               <div>
@@ -222,7 +222,8 @@ export default function ProjectDetailPage() {
                 <div className="grid grid-cols-1 gap-4">
                   {relatedAirdrops.map((rp) => (
                     <Link key={rp.id} to={`/project/${rp.slug}`} className="block">
-                      <ProjectCard project={rp} showActions={false} />
+                      {/* Menggunakan ProjectCard dengan variant "list" di sini juga */}
+                      <ProjectCard project={rp} showActions={false} variant="list" />
                     </Link>
                   ))}
                 </div>
@@ -235,7 +236,8 @@ export default function ProjectDetailPage() {
                 <div className="grid grid-cols-1 gap-4">
                   {relatedRegularProjects.map((rp) => (
                     <Link key={rp.id} to={`/project/${rp.slug}`} className="block">
-                      <ProjectCard project={rp} showActions={false} />
+                      {/* Menggunakan ProjectCard dengan variant "list" di sini juga */}
+                      <ProjectCard project={rp} showActions={false} variant="list" />
                     </Link>
                   ))}
                 </div>
@@ -248,8 +250,6 @@ export default function ProjectDetailPage() {
               </div>
             )}
           </div>
-          {/* AKHIR BAGIAN PROYEK LAINNYA YANG DIPISAHKAN */}
-
         </div>
       </main>
 

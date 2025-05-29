@@ -6,11 +6,10 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import React, { Suspense, lazy } from 'react';
 
-// Use React.lazy for page components
 const LandingPage = lazy(() => import('./pages/public/LandingPage'));
 const ProjectDetailPage = lazy(() => import('./pages/public/ProjectDetailPage'));
 const PublicProjectDashboard = lazy(() => import('./pages/public/PublicProjectDashboard'));
-const AirdropPage = lazy(() => import('./pages/public/AirdropPage')); // Nama file dan komponen diubah
+const AirdropPage = lazy(() => import('./pages/public/AirdropPage'));
 
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -30,13 +29,11 @@ function App() {
               </div>
             }>
               <Routes>
-                {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/projects" element={<PublicProjectDashboard />} />
                 <Route path="/project/:slug" element={<ProjectDetailPage />} />
-                <Route path="/airdrop" element={<AirdropPage />} /> {/* Rute diubah menjadi /airdrop */}
+                <Route path="/airdrop" element={<AirdropPage />} />
 
-                {/* Admin Routes */}
                 <Route path="/admin/login" element={<LoginPage />} />
                 <Route
                   path="/admin"
@@ -63,7 +60,6 @@ function App() {
                   }
                 />
 
-                {/* Fallback Route */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
