@@ -1,3 +1,4 @@
+// project/src/pages/admin/AdminDashboard.tsx
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
@@ -33,8 +34,9 @@ function AdminDashboard() {
   }, []);
 
   const fetchProjects = async () => {
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
       const { data, error } = await supabase
         .from('projects')
         .select('*')
@@ -162,12 +164,15 @@ function AdminDashboard() {
                     ? 'No results match your search. Try a different query.'
                     : 'Get started by creating your first project. They will appear here once added.'}
                 </p>
+                {/* Hapus tombol ini */}
+                {/*
                 <Link to="/admin/new">
                   <Button className="flex items-center px-4 py-2 text-sm">
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Create New Project
                   </Button>
                 </Link>
+                */}
               </div>
             ) : (
               <div className="overflow-x-auto">

@@ -21,42 +21,43 @@ export default function ProjectGrid({ searchQuery = '', selectedCategory }: Proj
   useEffect(() => {
     const fetchProjects = async () => {
       setIsLoading(true);
+      console.log('ProjectGrid: Fetching projects with searchQuery:', searchQuery, 'selectedCategory:', selectedCategory);
 
       try {
         let query = supabase
           .from('projects')
           .select('*')
+          .not('categories', 'cs', '["Airdrop"]')
           .order('created_at', { ascending: false });
 
         const trimmedSearchQuery = searchQuery.trim();
 
         if (trimmedSearchQuery && selectedCategory) {
-          // If both search query and a category are selected, filter within the category AND search titles/slugs.
           query = query
             .filter('categories', 'cs', `["${selectedCategory}"]`)
             .or(
-              `title.ilike.%${trimmedSearchQuery}%,slug.ilike.%${trimmedSearchQuery}%`
+              `title.ilike.%<span class="math-inline">\{trimmedSearchQuery\}%,slug\.ilike\.%</span>{trimmedSearchQuery}%`
             );
         } else if (selectedCategory) {
-          // If only a category is selected, filter by that category.
           query = query.filter('categories', 'cs', `["${selectedCategory}"]`);
         } else if (trimmedSearchQuery) {
-          // If only a general search query is present (no specific category selected via dropdown),
-          // search across titles, slugs, AND categories.
           query = query.or(
-            `title.ilike.%${trimmedSearchQuery}%,slug.ilike.%${trimmedSearchQuery}%,categories.cs.["${trimmedSearchQuery}"]`
+            `title.ilike.%<span class="math-inline">\{trimmedSearchQuery\}%,slug\.ilike\.%</span>{trimmedSearchQuery}%,categories.cs.["${trimmedSearchQuery}"]`
           );
         }
 
         const { data, error } = await query;
 
         if (error) {
+          console.error('ProjectGrid: Supabase fetch error:', error);
           throw error;
         }
 
+        console.log('ProjectGrid: Raw data from Supabase:', data);
         setProjects(data || []);
+
       } catch (error) {
-        console.error('Error fetching projects:', error);
+        console.error('ProjectGrid: Error fetching projects:', error);
         toast.error('Failed to load projects');
       } finally {
         setIsLoading(false);
@@ -71,11 +72,10 @@ export default function ProjectGrid({ searchQuery = '', selectedCategory }: Proj
     setShowShareModal(true);
   };
 
-  // The loading state now renders skeletons
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {Array.from({ length: 8 }).map((_, index) => ( // Render 8 skeleton cards
+        {Array.from({ length: 8 }).map((_, index) => (
           <ProjectCardSkeleton key={index} />
         ))}
       </div>

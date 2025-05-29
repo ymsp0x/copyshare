@@ -1,3 +1,6 @@
+// project/src/types/database.types.ts
+
+// Struktur Database Supabase Anda
 export interface Database {
   public: {
     Tables: {
@@ -12,7 +15,9 @@ export interface Database {
           slug: string;
           created_at: string;
           updated_at: string;
-          categories: string[];
+          categories: string[]; // Array of strings, e.g., ["Airdrop", "DeFi"]
+          airdrop_description: string | null; // Deskripsi singkat khusus Airdrop
+          project_type: 'article' | 'airdrop' | 'both'; // <--- Tambahan kolom project_type
         };
         Insert: {
           id?: string;
@@ -25,6 +30,8 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           categories?: string[];
+          airdrop_description?: string | null;
+          project_type?: 'article' | 'airdrop' | 'both'; // <--- Tambahan kolom project_type
         };
         Update: {
           id?: string;
@@ -37,6 +44,8 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           categories?: string[];
+          airdrop_description?: string | null;
+          project_type?: 'article' | 'airdrop' | 'both'; // <--- Tambahan kolom project_type
         };
       };
       categories: {
@@ -54,6 +63,47 @@ export interface Database {
           id?: string;
           name?: string;
           description?: string | null;
+        };
+      };
+      activities: {
+        Row: {
+          id: string;
+          activity_type: string; // e.g., 'airdrop_created_aktif', 'airdrop_updated_segera'
+          entity_type: string;   // 'project'
+          entity_id: string;        // ID dari proyek yang terpengaruh
+          entity_name: string | null;
+          description: string | null;
+          created_at: string;
+          metadata: Record<string, any> | null;
+          project_status_before: string | null;
+          project_status_after: string | null;
+          image_url: string | null;
+        };
+        Insert: {
+          id?: string;
+          activity_type: string;
+          entity_type: string;
+          entity_id: string;
+          entity_name?: string | null;
+          description?: string | null;
+          created_at?: string;
+          metadata?: Record<string, any> | null;
+          project_status_before?: string | null;
+          project_status_after?: string | null;
+          image_url?: string | null;
+        };
+        Update: {
+          id?: string;
+          activity_type?: string;
+          entity_type?: string;
+          entity_id?: string;
+          entity_name?: string | null;
+          description?: string | null;
+          created_at?: string;
+          metadata?: Record<string, any> | null;
+          project_status_before?: string | null;
+          project_status_after?: string | null;
+          image_url?: string | null;
         };
       };
     };
@@ -75,3 +125,4 @@ export interface Database {
 
 export type Project = Database['public']['Tables']['projects']['Row'];
 export type Category = Database['public']['Tables']['categories']['Row'];
+export type Activity = Database['public']['Tables']['activities']['Row'];

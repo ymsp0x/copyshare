@@ -185,6 +185,17 @@ export default function Navbar({
             >
               PROJECTS
             </Link>
+            <Link // Tautan Airdrop yang diperbarui
+              to="/airdrop"
+              className={cn(
+                "px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                location.pathname === '/airdrop' // Periksa path baru
+                  ? "text-primary-600 dark:text-primary-400"
+                  : "text-text-dark dark:text-text-light hover:text-primary-600 dark:hover:text-primary-400"
+              )}
+            >
+              AIRDROP {/* Label diperbarui */}
+            </Link>
             {/* Tombol Toggle Tema */}
             <button
               onClick={toggleTheme}
@@ -254,7 +265,6 @@ export default function Navbar({
                         <Tag className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" /> All Projects
                       </button>
                       <div className="border-t border-gray-100 dark:border-neutral-700 my-1"></div>
-                      {/* Show loading/error states for categories in mobile dropdown */}
                       {areCategoriesLoading ? (
                         <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">Loading categories...</div>
                       ) : categoriesError ? (
@@ -292,6 +302,16 @@ export default function Navbar({
                 onClick={closeMenu}
               >
                 PROJECTS
+              </Link>
+              <Link // Tautan Airdrop yang diperbarui untuk mobile
+                to="/airdrop"
+                className={cn(
+                  "block px-3 py-2 rounded-md text-base font-medium text-text-dark dark:text-text-light hover:bg-gray-50 dark:hover:bg-neutral-800 hover:text-primary-600 dark:hover:text-primary-400",
+                  location.pathname === '/airdrop' ? 'text-primary-600 dark:text-primary-400' : ''
+                )}
+                onClick={closeMenu}
+              >
+                AIRDROP {/* Label diperbarui */}
               </Link>
             </div>
           </div>

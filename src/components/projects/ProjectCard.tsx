@@ -1,3 +1,4 @@
+// project/src/components/projects/ProjectCard.tsx
 import { Link } from 'react-router-dom';
 import { Share2 } from 'lucide-react';
 import { Project } from '../../types/database.types';
@@ -19,31 +20,28 @@ const stripHtmlTags = (htmlString: string | null): string => {
 };
 
 export default function ProjectCard({ project, showActions = true, onShare }: ProjectCardProps) {
-  const statusColor = STATUS_COLORS[project.status] || 'bg-neutral-100 text-neutral-800';
   const defaultImage = 'https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2';
 
-  const plainTextDescription = stripHtmlTags(project.description);
+  // Selalu tampilkan project.description (deskripsi artikel/blog penuh) di sini
+  const displayedDescription = stripHtmlTags(project.description); 
 
   return (
     <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg flex flex-col h-full group shadow-glow-sm dark:shadow-glow-sm hover:shadow-glow-md dark:hover:shadow-glow-md">
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-48 overflow-hidden rounded-xl">
         <img
           src={project.image_url || defaultImage}
           alt={project.title}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          loading="lazy" // <-- Added lazy loading here
+          loading="lazy"
         />
-        <div className="absolute top-3 right-3">
-          <span className={cn("px-3 py-1 rounded-full text-xs font-semibold", statusColor)}>
-            {project.status}
-          </span>
-        </div>
       </div>
 
       <div className="p-5 flex-1 flex flex-col">
         <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-2 line-clamp-2">{project.title}</h3>
 
-        <p className="text-neutral-600 dark:text-neutral-300 text-sm mb-4 line-clamp-3">{plainTextDescription}</p>
+        <p className="text-neutral-600 dark:text-neutral-300 text-sm mb-4 line-clamp-3">
+          {displayedDescription}
+        </p>
 
         <div className="flex flex-wrap gap-1.5 mt-auto mb-3">
           {project.categories?.slice(0, 3).map((category, index) => (

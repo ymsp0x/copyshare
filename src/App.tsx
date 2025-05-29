@@ -9,7 +9,8 @@ import React, { Suspense, lazy } from 'react';
 // Use React.lazy for page components
 const LandingPage = lazy(() => import('./pages/public/LandingPage'));
 const ProjectDetailPage = lazy(() => import('./pages/public/ProjectDetailPage'));
-const PublicProjectDashboard = lazy(() => import('./pages/public/PublicProjectDashboard')); // New import
+const PublicProjectDashboard = lazy(() => import('./pages/public/PublicProjectDashboard'));
+const AirdropPage = lazy(() => import('./pages/public/AirdropPage')); // Nama file dan komponen diubah
 
 const LoginPage = lazy(() => import('./pages/admin/LoginPage'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -31,8 +32,9 @@ function App() {
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/projects" element={<PublicProjectDashboard />} /> {/* New route for public dashboard */}
+                <Route path="/projects" element={<PublicProjectDashboard />} />
                 <Route path="/project/:slug" element={<ProjectDetailPage />} />
+                <Route path="/airdrop" element={<AirdropPage />} /> {/* Rute diubah menjadi /airdrop */}
 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<LoginPage />} />
