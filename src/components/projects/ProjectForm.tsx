@@ -1,71 +1,59 @@
 // project/src/components/projects/ProjectForm.tsx
-// Form untuk membuat atau mengedit proyek.
-// Menyertakan validasi, upload gambar, dan logika pencegahan duplikasi judul proyek.
-
 import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { X, Upload } from 'lucide-react';
-import { Project } from '../../types/database.types'; // Import tipe Project
-import { supabase } from '../../lib/supabase'; // Import Supabase client
-import { slugify } from '../../lib/utils'; // Utility untuk slugify
-import Button from '../ui/Button'; // Komponen Button
-import Input from '../ui/Input'; // Komponen Input
-import Select from 'react-select'; // Komponen Select untuk kategori
-import RichTextEditor from '../ui/RichTextEditor'; // Komponen Rich Text Editor
-import TextArea from '../ui/TextArea'; // Komponen TextArea
-import { useCategories } from '../../hooks/useCategories'; // Hook untuk mengambil kategori
+import { Project } from '../../types/database.types';
+import { supabase } from '../../lib/supabase';
+import { slugify } from '../../lib/utils';
+import Button from '../ui/Button';
+import Input from '../ui/Input';
+import Select from 'react-select';
+import RichTextEditor from '../ui/RichTextEditor';
+import TextArea from '../ui/TextArea'; // Hapus ini
+import { useCategories } from '../../hooks/useCategories';
 
-// Definisi props untuk komponen ProjectForm
 interface ProjectFormProps {
-  project?: Project; // Data proyek jika dalam mode edit
-  isEditMode?: boolean; // Menunjukkan apakah form dalam mode edit
+  project?: Project;
+  isEditMode?: boolean;
 }
 
-// Definisi tipe data formulir
 type FormValues = {
   title: string;
-  description: string; // Deskripsi utama (artikel/blog)
+  description: string;
   status: 'Aktif' | 'Segera' | 'Selesai';
-  image_url: string | null; // Tambahkan image_url ke FormValues untuk validasi
-  project_url: string;
   slug: string;
-  categories: string[]; // Kategori tambahan (selain Airdrop)
-  airdrop_description: string; // Deskripsi singkat khusus Airdrop
-  project_type: 'article' | 'airdrop' | 'both'; // Tipe proyek eksplisit
+  project_url: string;
+  categories: string[];
+  airdrop_description: string;
+  project_type: 'article' | 'airdrop' | 'both';
 };
 
-// Fungsi pembantu untuk mendapatkan nama file dari URL
 function getFileNameFromUrl(url: string): string {
   try {
     const urlObj = new URL(url);
     const parts = urlObj.pathname.split('/');
     return parts.filter(Boolean).pop() || url;
   } catch (error) {
-    // Jika URL tidak valid, kembalikan saja URL-nya
     return url;
   }
 }
 
 export default function ProjectForm({ project, isEditMode = false }: ProjectFormProps) {
   const navigate = useNavigate();
-  // State untuk manajemen gambar
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageFileName, setImageFileName] = useState<string | null>(project?.image_url ? getFileNameFromUrl(project.image_url) : null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(project?.image_url || null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // State untuk melacak status submit form
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Mengambil daftar kategori dari hook kustom
   const { categoryNames, isLoading: areCategoriesLoading, error: categoriesError } = useCategories();
 
-  // Mempersiapkan opsi untuk React-Select, mencakup semua kategori
   const categoryOptions = categoryNames.map(category => ({
     value: category,
     label: category,
   }));
 
-  // Inisialisasi React Hook Form
   const {
     register,
     handleSubmit,
@@ -73,8 +61,8 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
     setValue,
     watch,
     formState: { errors, dirtyFields },
-    setError: setFormError, // Untuk mengatur error form secara manual
-    clearErrors, // Untuk membersihkan error form manual
+    setError: setFormError,
+    clearErrors,
   } = useForm<FormValues>({
     defaultValues: {
       title: project?.title || '',
@@ -82,54 +70,44 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
       status: project?.status || 'Aktif',
       slug: project?.slug || '',
       project_url: project?.project_url || '',
-      categories: project?.categories || [], // Default kategori dari proyek
+      categories: project?.categories || [],
       airdrop_description: project?.airdrop_description || '',
-      project_type: project?.project_type || (project?.categories?.includes('Airdrop') ? 'both' : 'article'), // Default tipe proyek
-      image_url: project?.image_url || null, // Default image_url
+      project_type: project?.project_type || (project?.categories?.includes('Airdrop') ? 'both' : 'article'),
     }
   });
 
-  // Watch nilai dari field yang relevan untuk logika kondisional
   const watchTitle = watch('title');
   const watchProjectType = watch('project_type');
   const watchCategories = watch('categories');
-  const watchImageUrl = watch('image_url'); // Watch image_url untuk validasi gambar
 
-  // Variabel pembantu untuk tipe proyek
   const isAirdropType = watchProjectType === 'airdrop' || watchProjectType === 'both';
   const isArticleType = watchProjectType === 'article' || watchProjectType === 'both';
 
-  // Efek untuk mengupdate slug secara otomatis dari title
   useEffect(() => {
-    if (!isEditMode || (isEditMode && !project?.slug)) { // Hanya di mode buat baru atau jika slug belum ada di mode edit
-      if (watchTitle && !dirtyFields.slug) { // Update slug hanya jika title diisi dan slug belum diedit manual
+    if (!isEditMode || (isEditMode && !project?.slug)) {
+      if (watchTitle && !dirtyFields.slug) {
         setValue('slug', slugify(watchTitle));
       }
     }
   }, [watchTitle, setValue, isEditMode, project?.slug, dirtyFields.slug]);
 
-  // Efek untuk menangani error saat mengambil kategori
   useEffect(() => {
     if (categoriesError) {
       toast.error(`Error loading categories: ${categoriesError.message}`);
     }
   }, [categoriesError]);
 
-  // Efek untuk mensinkronkan kategori 'Airdrop' dengan project_type yang dipilih
-  // Ini akan secara otomatis menambahkan/menghapus 'Airdrop' dari array kategori yang disimpan
   useEffect(() => {
     const currentCategories = watchCategories || [];
-    // Jika project_type adalah Airdrop atau Both, pastikan 'Airdrop' ada di kategori
     if (isAirdropType && !currentCategories.includes('Airdrop')) {
       setValue('categories', [...currentCategories, 'Airdrop'], { shouldValidate: true });
     }
-    // Jika project_type adalah Article, pastikan 'Airdrop' tidak ada di kategori
     else if (!isAirdropType && currentCategories.includes('Airdrop')) {
       setValue('categories', currentCategories.filter(cat => cat !== 'Airdrop'), { shouldValidate: true });
     }
   }, [isAirdropType, watchCategories, setValue]);
 
-  // Handler untuk perubahan input gambar
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -138,7 +116,7 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
         toast.error('Only JPG, PNG, GIF, or WebP images are allowed.');
         return;
       }
-      if (file.size > 5 * 1024 * 1024) { // Batas ukuran 5MB
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
         toast.error('Image size must be less than 5MB.');
         return;
       }
@@ -146,23 +124,18 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
       setImageFile(file);
       setImageFileName(file.name);
       setImagePreviewUrl(URL.createObjectURL(file));
-      setValue('image_url', URL.createObjectURL(file), { shouldValidate: true }); // Set URL gambar ke form value
-      clearErrors('image_url'); // Hapus error terkait gambar jika upload berhasil
+      clearErrors('image_url');
     }
   };
 
-  // Handler untuk menghapus gambar
   const clearImage = () => {
     setImageFile(null);
     setImageFileName(null);
     setImagePreviewUrl(null);
-    setValue('image_url', null, { shouldValidate: true }); // Set image_url di form value menjadi null
   };
 
-  // Fungsi untuk mengunggah gambar ke Supabase Storage
   const uploadImage = async (file: File) => {
     const fileExt = file.name.split('.').pop();
-    // PENTING: Pastikan ini menggunakan BACKTICKS (`)
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
     const filePath = `project-images/${fileName}`;
 
@@ -185,19 +158,18 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
     return publicUrl;
   };
 
-  // Handler utama untuk submit form
   const onSubmit = async (data: FormValues) => {
     try {
       setIsSubmitting(true);
 
-      let imageUrlToSave = project?.image_url || null; // URL gambar yang sudah ada
-      if (imageFile) { // Jika ada file baru yang diunggah
-        imageUrlToSave = await uploadImage(imageFile);
-      } else if (imageFileName === null && project?.image_url) { // Jika gambar yang ada dihapus
-        imageUrlToSave = null;
+      let imageUrl = project?.image_url || null;
+
+      if (imageFile) {
+        imageUrl = await uploadImage(imageFile);
+      } else if (imageFileName === null && project?.image_url) {
+        imageUrl = null;
       }
-      // Validasi gambar: harus ada jika ini proyek baru atau edit tapi gambar dihapus
-      if (!imageUrlToSave) {
+      if (!imageUrl && !isEditMode) {
         setFormError('image_url', { type: 'manual', message: 'Project image is required.' });
         toast.error('Project image is required.');
         setIsSubmitting(false);
@@ -205,15 +177,13 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
       }
 
 
-      // Proses deskripsi utama (artikel/blog)
       const strippedDescription = data.description.replace(/<(?:.|\n)*?>/gm, '').trim();
       const finalDescription = (isArticleType && strippedDescription === '') ? '' : data.description;
 
-      // Proses deskripsi Airdrop singkat
-      const strippedAirdropDescription = data.airdrop_description.replace(/<(?:.|\n)*?>/gm, '').trim();
-      const finalAirdropDescription = (isAirdropType && strippedAirdropDescription === '') ? null : data.airdrop_description;
+      // Tidak perlu di-strip karena RichTextEditor sudah menghasilkan HTML yang valid
+      const finalAirdropDescription = (isAirdropType) ? data.airdrop_description : null;
 
-      // Validasi custom untuk memastikan deskripsi utama terisi jika tipe artikel/both
+
       if (isArticleType && strippedDescription === '') {
         setFormError('description', { type: 'manual', message: 'Main Description is required for this project type.' });
         toast.error('Main Description is required.');
@@ -221,8 +191,7 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
         return;
       }
 
-      // Validasi custom untuk memastikan deskripsi Airdrop terisi jika tipe airdrop/both
-      if (isAirdropType && strippedAirdropDescription === '') {
+      if (isAirdropType && data.airdrop_description === '') { // Validasi untuk airdrop_description
         setFormError('airdrop_description', { type: 'manual', message: 'Airdrop Description is required for this project type.' });
         toast.error('Airdrop Description is required.');
         setIsSubmitting(false);
@@ -231,14 +200,13 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
 
 
       if (isEditMode && project) {
-        // Mode Edit: Langsung update proyek yang ada
         const { error } = await supabase
           .from('projects')
           .update({
             ...data,
             description: finalDescription,
             airdrop_description: finalAirdropDescription,
-            image_url: imageUrlToSave, // Gunakan URL gambar yang sudah di proses
+            image_url: imageUrl,
             updated_at: new Date().toISOString(),
           })
           .eq('id', project.id);
@@ -250,18 +218,16 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
 
         toast.success('Project updated successfully');
       } else {
-        // Mode Buat Baru: Lakukan pengecekan duplikasi judul + project_type sebelum insert
         const { data: existingProjects, error: fetchError } = await supabase
           .from('projects')
           .select('id, title, slug, project_type')
           .eq('title', data.title)
-          .eq('project_type', data.project_type); // Periksa duplikasi berdasarkan judul DAN project_type
+          .eq('project_type', data.project_type);
 
         if (fetchError) throw fetchError;
 
         if (existingProjects && existingProjects.length > 0) {
           const existingProject = existingProjects[0];
-          // Tampilkan konfirmasi kepada admin jika ditemukan proyek dengan judul & tipe yang sama
           const confirmAction = window.confirm(
             `Proyek dengan judul "${data.title}" dan tipe "${data.project_type}" sudah ada (Slug: ${existingProject.slug}).\n\n` +
             `Pilih "OK" untuk mengedit proyek yang sudah ada ini (Anda akan diarahkan ke halaman edit).` +
@@ -279,19 +245,17 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
           }
         }
 
-        // Lanjutkan dengan insert jika tidak ada duplikasi judul + project_type
         const { error } = await supabase
           .from('projects')
           .insert({
             ...data,
             description: finalDescription,
             airdrop_description: finalAirdropDescription,
-            image_url: imageUrlToSave, // Gunakan URL gambar yang sudah di proses
+            image_url: imageUrl,
           });
 
         if (error) {
           console.error('Supabase project creation error:', error);
-          // Tangani error spesifik jika slug otomatis yang digenerate ternyata duplikat
           if (error.code === '23505' && error.details?.includes('slug')) {
             setFormError('slug', {
               type: 'manual',
@@ -307,19 +271,17 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
         toast.success('Project created successfully');
       }
 
-      navigate('/admin'); // Arahkan ke dashboard admin setelah berhasil
+      navigate('/admin');
     } catch (error: any) {
       console.error('Error saving project:', error);
-      // Hindari pesan toast ganda jika error sudah ditangani secara spesifik
       if (!errors.slug && !errors.description && !errors.airdrop_description && !errors.image_url && !isSubmitting) {
         toast.error(`Failed to ${isEditMode ? 'update' : 'create'} project: ${error.message || 'Unknown error'}`);
       }
     } finally {
-      setIsSubmitting(false); // Reset submitting state di akhir
+      setIsSubmitting(false);
     }
   };
 
-  // Gaya kustom untuk React-Select
   const customSelectStyles = {
     control: (provided: any, state: any) => ({
       ...provided,
@@ -356,8 +318,8 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
       backgroundColor: state.isSelected
         ? 'var(--color-primary-500)'
         : state.isFocused
-        ? 'var(--bg-neutral-100)'
-        : 'var(--bg-white)',
+          ? 'var(--bg-neutral-100)'
+          : 'var(--bg-white)',
       color: state.isSelected
         ? 'white'
         : 'var(--text-neutral-900)',
@@ -527,19 +489,34 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
         {/* Deskripsi Airdrop Singkat - Muncul jika tipe adalah 'airdrop' atau 'both' */}
         {isAirdropType && (
           <div>
-            <TextArea
-              id="airdrop_description"
-              label="Airdrop Short Description (Optional)"
-              placeholder="Enter a brief description specific to the Airdrop activity..."
-              {...register('airdrop_description', {
+            <label htmlFor="airdrop_description" className="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-2">
+              Airdrop Short Description
+            </label>
+            <Controller
+              name="airdrop_description"
+              control={control}
+              rules={{
                 required: isAirdropType ? 'Airdrop Description is required for this type' : false,
-              })}
-              error={errors.airdrop_description?.message}
-              rows={4}
+              }}
+              render={({ field }) => (
+                <div className={
+                  `rounded-lg shadow-sm
+                  ${errors.airdrop_description ? 'border-red-500 dark:border-red-400 ring-red-500' : 'border-neutral-300 dark:border-neutral-700 ring-blue-500'}
+                  focus-within:ring-2 focus-within:border-blue-500 dark:focus-within:border-blue-500 border`
+                }>
+                  <RichTextEditor // Ganti TextArea dengan RichTextEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={() => field.onBlur()}
+                    placeholder="Enter a brief description specific to the Airdrop activity..."
+                    minHeight="120px" // Sesuaikan tinggi sesuai kebutuhan
+                  />
+                </div>
+              )}
             />
-            <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-              This description will be used on the Airdrop activities page and in brief listings for Airdrop projects.
-            </p>
+            {errors.airdrop_description && (
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.airdrop_description.message}</p>
+            )}
           </div>
         )}
 
@@ -584,7 +561,6 @@ export default function ProjectForm({ project, isEditMode = false }: ProjectForm
             <p className="mt-2 text-sm text-red-600 dark:text-red-400">Error loading categories.</p>
           )}
         </div>
-        {/* Akhir Bagian Kategori */}
 
         <div>
           <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-200 mb-3">
